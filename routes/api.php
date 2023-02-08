@@ -17,3 +17,4 @@ use Illuminate\Support\Facades\Route;
 Route::resource('categories', 'App\Http\Controllers\Api\CategoryController');
 Route::resource('colleges', 'App\Http\Controllers\Api\CollegeController');
 Route::resource('notifications', 'App\Http\Controllers\Api\NotificationController');
+Route::resource('actions', 'App\Http\Controllers\Api\ActionController');
