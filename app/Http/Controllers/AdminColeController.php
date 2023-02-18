@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CollegeUser;
-use App\Models\Course;
 use App\Models\User;
+use App\Models\Course;
 use App\Models\UserRoles;
+use App\Models\CollegeUser;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
 class AdminColeController extends Controller
@@ -112,6 +113,8 @@ class AdminColeController extends Controller
             $user->email = $email;
             $user->password = $password;
             $user->phone = $phone;
+            $user->remember_token = Str::random(10);
+
             if (!$address) {
                 $user->address = '';
             } else {

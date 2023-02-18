@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\College;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
 class CollegeController extends Controller
@@ -80,6 +81,8 @@ class CollegeController extends Controller
             $college->dni = $dni;
             $college->name = $name;
             $college->phone = $phone;
+            $college->remember_token = Str::random(10);
+
             if (!$address) {
                 $college->address = '';
             } else {

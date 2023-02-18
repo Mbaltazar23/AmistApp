@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\College;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,15 +35,26 @@ class AuthController extends Controller
 
             $imgPerfil = '';
             foreach ($user->roles as $role) {
-                if ($role->role == 'Administrador') {
-                    $imgPerfil = 'avatar5.png';
-                    break;
-                } else if ($role->role == 'Profesor') {
+                if ($role->role == env("ROLADMIN")) {
                     $imgPerfil = 'avatar5.png';
                     break;
                 } else {
-                    $imgPerfil = 'avatarAlum.jpg';
+                    if ($role->role == env("ROLADMINCOLE")) {
+                        $imgPerfil = 'avatarAdminCole.png';
+                    } else if ($role->role == env("ROLPROFE")) {
+                        $imgPerfil = 'avatar5.png';
+                    } else {
+                        $imgPerfil = 'avatarAlum.jpg';
+                    }
+                    // Obtiene el colegio asociado al usuario
+                    $college = College::whereHas('usersCollege', function ($query) use ($user) {
+                        $query->where('user_id', $user->id);
+                    })->first();
+                    // Anida el colegio al usuario
+                    $user->college = $college;
+                    break;
                 }
+
             }
 
             // Agregamos la imagen al objeto usuario
@@ -52,7 +64,6 @@ class AuthController extends Controller
             Auth::login($user);
 
             session(['imgPerfil' => $imgPerfil]);
-
 
             return response()->json([
                 'success' => true,

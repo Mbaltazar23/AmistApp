@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Answer;
-use App\Models\Notification;
 use App\Models\Question;
-use App\Models\UserNotification;
+use Illuminate\Support\Str;
+use App\Models\Notification;
 use Illuminate\Http\Request;
+use App\Models\UserNotification;
 
 class NotificationController extends Controller
 {
@@ -81,6 +82,8 @@ class NotificationController extends Controller
             $notification->message = $titleNotificacion;
             $notification->type = $listTypeNotificacion;
             $notification->points = $points; // You need to add the points field to your Notification model
+            $notification->remember_token = Str::random(10);
+
             $notification->save();
             $option = 1;
         } else {

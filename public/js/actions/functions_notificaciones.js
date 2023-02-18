@@ -693,7 +693,7 @@ function fntDelQuestionInfo(idquestion) {
     }).then((isClosed) => {
         if (isClosed) {
             axios
-                .post(`/notifications/questionDel/${idnotificacion}`)
+                .post(`/notifications/questionDel/${idquestion}`)
                 .then((response) => {
                     if (response.data.status) {
                         swal("Exito!", response.data.msg, "success");
