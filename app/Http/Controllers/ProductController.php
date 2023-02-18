@@ -181,6 +181,7 @@ class ProductController extends Controller
 
         return response()->json(['status' => true, 'msg' => $message]);
     }
+
     public function deleteFile(string $name, string $ruta): bool
     {
         $path = public_path('images/' . $ruta . '/' . $name);
@@ -190,8 +191,19 @@ class ProductController extends Controller
     public function getReport()
     {
         $products = Product::with('category')->get();
+        $rowsProducts = [];
+        foreach ($products as $product) {
+            $rowsProducts[] = [
+                'nombre' => $product->name,
+                'imagen' => asset('images/products/' . $product->image),
+                'categoria' => $product->category->name,
+                'stock' => $product->stock,
+                'puntos' => $product->points,
+                'status' => $product->status,
+            ];
+        }
         return response()->json([
-            'data' => $products,
+            'data' => $rowsProducts,
         ]);
     }
 

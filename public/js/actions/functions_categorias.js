@@ -204,11 +204,11 @@ function openModal() {
 }
 
 function generarReporte() {
-    $.post(
-        //base_url + "/Categorias/getCategoriasReport",
-        function (response) {
+    axios
+        .post("/categories/report")
+        .then(function (response) {
             var fecha = new Date();
-            let categorias = JSON.parse(response);
+            let categorias = response.data.data;
             //console.log(notificaciones);
             //console.log(tecnicos);
             let estado = "";
@@ -259,6 +259,8 @@ function generarReporte() {
             );
             pdf.save("ReporteCategorias.pdf");
             swal("Exito", "Reporte Imprimido Exitosamente..", "success");
-        }
-    );
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
 }

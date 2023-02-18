@@ -12,7 +12,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $data['page_tag'] }}</title>
-    <link rel="icon" href="{{ asset('img/AmistAppIcon.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('images/AmistAppIcon.png') }}" type="image/x-icon">
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"

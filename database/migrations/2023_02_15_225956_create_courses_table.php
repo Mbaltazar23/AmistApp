@@ -19,6 +19,7 @@ class CreateCoursesTable extends Migration
             $table->string('dni');
             $table->string('name')->nullable();
             $table->unsignedBigInteger('college_id');
+            $table->text('address')->nullable();
             $table->foreign('college_id')
                 ->references('id')->on('colleges')
                 ->onDelete('cascade');

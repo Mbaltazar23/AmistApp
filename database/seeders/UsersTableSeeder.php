@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -25,6 +26,8 @@ class UsersTableSeeder extends Seeder
                 'password' =>  bcrypt('AmistApp.'),
                 'address' => 'Temuco en casita',
                 'status' => 1,
+                'remember_token' =>  Str::random(10),
+
             ],
             [
                 'dni' => '19.493.544-3',
@@ -33,7 +36,8 @@ class UsersTableSeeder extends Seeder
                 'phone' => '+56953453453',
                 'password' => bcrypt('AmistApp.'),
                 'address' => '',
-                'status' => 1
+                'status' => 1,
+                'remember_token' =>  Str::random(10),
             ],
             [
                 'dni' => '14.354.656-5',
@@ -43,6 +47,7 @@ class UsersTableSeeder extends Seeder
                 'password' => bcrypt('AmistApp.'),
                 'address' => 'Las petunias',
                 'status' => 2,
+                'remember_token' =>  Str::random(10),
             ],
         ]);
     }

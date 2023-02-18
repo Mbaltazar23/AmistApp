@@ -95,34 +95,44 @@ window.addEventListener(
                 let uploadFoto = document.querySelector("#image").value;
                 let fileimg = document.querySelector("#image").files;
                 let nav = window.URL || window.webkitURL;
-                let contactAlert = document.querySelector('#form_alert');
-                if (uploadFoto != '') {
+                let contactAlert = document.querySelector("#form_alert");
+                if (uploadFoto != "") {
                     let type = fileimg[0].type;
                     let name = fileimg[0].name;
-                    if (type != 'image/jpeg' && type != 'image/jpg' && type != 'image/png') {
-                        contactAlert.innerHTML = '<p class="errorArchivo">El archivo no es válido.</p>';
-                        if (document.querySelector('#img')) {
-                            document.querySelector('#img').remove();
+                    if (
+                        type != "image/jpeg" &&
+                        type != "image/jpg" &&
+                        type != "image/png"
+                    ) {
+                        contactAlert.innerHTML =
+                            '<p class="errorArchivo">El archivo no es válido.</p>';
+                        if (document.querySelector("#img")) {
+                            document.querySelector("#img").remove();
                         }
-                        document.querySelector('.delPhoto').classList.add("notBlock");
+                        document
+                            .querySelector(".delPhoto")
+                            .classList.add("notBlock");
                         foto.value = "";
                         return false;
                     } else {
-                        contactAlert.innerHTML = '';
-                        if (document.querySelector('#img')) {
-                            document.querySelector('#img').remove();
+                        contactAlert.innerHTML = "";
+                        if (document.querySelector("#img")) {
+                            document.querySelector("#img").remove();
                         }
-                        document.querySelector('.delPhoto').classList.remove("notBlock");
+                        document
+                            .querySelector(".delPhoto")
+                            .classList.remove("notBlock");
                         let objeto_url = nav.createObjectURL(this.files[0]);
-                        document.querySelector('.prevPhoto div').innerHTML = "<img id='img' src=" + objeto_url + ">";
+                        document.querySelector(".prevPhoto div").innerHTML =
+                            "<img id='img' src=" + objeto_url + ">";
                     }
                 } else {
                     swal("Error !!", "No selecciono una foto", "error");
-                    if (document.querySelector('#img')) {
-                        document.querySelector('#img').remove();
+                    if (document.querySelector("#img")) {
+                        document.querySelector("#img").remove();
                     }
                 }
-            }
+            };
         }
 
         if (document.querySelector(".delPhoto")) {
@@ -327,4 +337,66 @@ function openModal() {
     document.querySelector("#titleModal").innerHTML = "Nuevo Producto";
     document.querySelector("#formProductos").reset();
     $("#modalFormProductos").modal("show");
+}
+
+function generarReporte() {
+    axios
+        .post("/products/report")
+        .then(function (response) {
+            var fecha = new Date();
+            let productos = response.data.data;
+            //console.log(notificaciones);
+            //console.log(tecnicos);
+            let estado = "";
+            var pdf = new jsPDF();
+            var columns = ["NOMBRE", "CATEGORIA", "STOCK", "PUNTOS", "ESTADO"];
+            var data = [];
+
+            for (let i = 0; i < productos.length; i++) {
+                if (productos[i].status == 1) {
+                    estado = "ACTIVO";
+                } else {
+                    estado = "INACTIVO";
+                }
+                data[i] = [
+                    productos[i].nombre,
+                    productos[i].categoria,
+                    productos[i].stock,
+                    productos[i].puntos,
+                    estado,
+                ];
+            }
+
+            pdf.text(20, 20, "Reportes de los Productos Registrados");
+
+            pdf.autoTable(columns, data, {
+                startY: 40,
+                styles: {
+                    cellPadding: 10,
+                    fontSize: 8,
+                    font: "helvetica",
+                    textColor: [0, 0, 0],
+                    fillColor: [255, 255, 255],
+                    lineWidth: 0.1,
+                    halign: "center",
+                    valign: "middle",
+                },
+            });
+
+            pdf.text(
+                20,
+                pdf.autoTable.previous.finalY + 20,
+                "Fecha de Creacion : " +
+                    fecha.getDate() +
+                    "/" +
+                    (fecha.getMonth() + 1) +
+                    "/" +
+                    fecha.getFullYear()
+            );
+            pdf.save("ReporteProductos.pdf");
+            swal("Exito", "Reporte Imprimido Exitosamente..", "success");
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
 }

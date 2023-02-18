@@ -19,7 +19,7 @@ class College extends Model
         'created_at'
     ];
 
-    public function userColleges(){
+    public function usersCollege(){
         return $this->hasMany(CollegeUser::class);
     }
 

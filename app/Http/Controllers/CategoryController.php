@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use Carbon\Carbon;
 use App\Models\Product;
+use App\Models\Category;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -60,6 +62,7 @@ class CategoryController extends Controller
     {
         $id = $request->input('id');
         $name = ucwords($request->input('name'));
+        $remember_token = Str::random(10);
         if ($id) {
             // actualizar categoría
             $category = Category::find($id);
@@ -67,11 +70,19 @@ class CategoryController extends Controller
             $category->save();
             return response()->json(['status' => true, 'msg' => 'Categoría actualizada con éxito', 'data' => $category]);
         } else {
-            // insertar categoría
-            $category = new Category();
-            $category->name = $name;
-            $category->save();
-            return response()->json(['status' => true, 'msg' => 'Categoría agregada con éxito', 'data' => $category]);
+
+            $count = Category::where('name', $name)->count();
+
+            if ($count > 0) {
+                return response()->json(['status' => false, 'msg' => 'Esta Categoría ya existe']);
+            } else {
+                // insertar categoría
+                $category = new Category();
+                $category->name = $name;
+                $category->remember_token = $remember_token;
+                $category->save();
+                return response()->json(['status' => true, 'msg' => 'Categoría agregada con éxito', 'data' => $category]);
+            }
         }
 
     }
@@ -128,8 +139,19 @@ class CategoryController extends Controller
     public function getReport()
     {
         $categories = Category::all();
+        $formattedCategories = [];
+        foreach ($categories as $category) {
+            $formattedCategories[] = [
+                'id' => $category->id,
+                'nombre' => $category->name,
+                'fecha' => Carbon::parse($category->created_at)->format('d-m-Y'),
+                'hora' => Carbon::parse($category->created_at)->format('H:i:s'),
+                'status' => $category->status,
+            ];
+        }
+
         return response()->json([
-            'data' => $categories,
+            'data' => $formattedCategories,
         ]);
     }
 
