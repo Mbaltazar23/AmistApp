@@ -322,6 +322,7 @@ class DashboardController extends Controller
     public function porcentajeStudentsCourse($collegeId)
     {
         $percentage = 0;
+
         $studentsCount = Student::whereHas('course.college', function ($query) use ($collegeId) {
             $query->where('id', $collegeId);
         })->count();
@@ -329,10 +330,9 @@ class DashboardController extends Controller
         $coursesCount = Course::where('college_id', $collegeId)->count();
 
         if ($coursesCount > 0) {
-            $percentage = ($studentsCount / ($coursesCount * $studentsCount)) * 100;
-        } else {
-            $percentage = 0;
+            $percentage = ($studentsCount / $coursesCount) * 100;
         }
+
         return $percentage;
     }
 

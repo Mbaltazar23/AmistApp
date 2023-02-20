@@ -24,7 +24,8 @@ class CourseController extends Controller
 
     public function getCourses()
     {
-        $courses = Course::all();
+        $courses = Course:: where('college_id', Auth::user()->colleges->first()->college_id)
+                 ->get();
         $data = [];
         foreach ($courses as $key => $course) {
             $btnView = '';
@@ -38,14 +39,14 @@ class CourseController extends Controller
             ];
             if ($course->status == 1) {
                 $row['status'] = '<span class="badge badge-success">Activo</span>';
-                $btnView = '<button class="btn btn-info btn-sm" onClick="fntViewInfo(' . ($key + 1) . ',' . $course->id . ')" title="Ver curso"><i class="far fa-eye"></i></button>';
-                $btnEdit = '<button class="btn btn-primary  btn-sm" onClick="fntEditInfo(this,' . $course->id . ')" title="Editar curso"><i class="fas fa-pencil-alt"></i></button>';
-                $btnDelete = '<button class="btn btn-danger btn-sm" onClick="fntDelInfo(' . $course->id . ')" title="Eliminar curso"><i class="far fa-trash-alt"></i></button>';
+                $btnView = '<button class="btn btn-info btn-sm" onClick="fntViewInfo(' . ($key + 1) . ',' . $course->id . ')" title="Ver course"><i class="far fa-eye"></i></button>';
+                $btnEdit = '<button class="btn btn-primary  btn-sm" onClick="fntEditInfo(this,' . $course->id . ')" title="Editar course"><i class="fas fa-pencil-alt"></i></button>';
+                $btnDelete = '<button class="btn btn-danger btn-sm" onClick="fntDelInfo(' . $course->id . ')" title="Eliminar course"><i class="far fa-trash-alt"></i></button>';
             } else {
                 $row['status'] = '<span class="badge badge-danger">Inactivo</span>';
-                $btnView = '<button class="btn btn-secondary btn-sm" onClick="fntViewInfo(' . ($key + 1) . ',' . $course->id . ')" title="Ver curso" disabled><i class="far fa-eye"></i></button>';
-                $btnEdit = '<button class="btn btn-secondary  btn-sm" onClick="fntEditInfo(this,' . $course->id . ')" title="Editar curso" disabled><i class="fas fa-pencil-alt"></i></button>';
-                $btnDelete = '<button class="btn btn-dark btn-sm" onClick="fntActivateInfo(' . $course->id . ')" title="Activar curso"><i class="fas fa-toggle-on"></i></button>';
+                $btnView = '<button class="btn btn-secondary btn-sm" onClick="fntViewInfo(' . ($key + 1) . ',' . $course->id . ')" title="Ver course" disabled><i class="far fa-eye"></i></button>';
+                $btnEdit = '<button class="btn btn-secondary  btn-sm" onClick="fntEditInfo(this,' . $course->id . ')" title="Editar course" disabled><i class="fas fa-pencil-alt"></i></button>';
+                $btnDelete = '<button class="btn btn-dark btn-sm" onClick="fntActivateInfo(' . $course->id . ')" title="Activar course"><i class="fas fa-toggle-on"></i></button>';
             }
             $row['options'] = '<div class="text-center">' . $btnView . '  ' . $btnEdit . '  ' . $btnDelete . '</div>';
             $data[] = $row;
@@ -139,18 +140,19 @@ class CourseController extends Controller
 
     public function getReport()
     {
-        $cursos = Course::withCount(['students', 'teachers'])
-            ->get();
+        $courses = Course::where('college_id', Auth::user()->colleges->first()->college_id)
+        ->withCount(['students', 'teachers'])
+        ->get();
         $data = [];
-        foreach ($cursos as $i => $curso) {
+        foreach ($courses as $i => $course) {
             $data[] = [
                 'nro' => $i + 1,
-                'nombre' => $curso->name . ' ' . $curso->section,
-                'fecha' => Carbon::parse($curso->created_at)->format('d-m-Y'),
-                'hora' => Carbon::parse($curso->created_at)->format('H:i:s'),
-                'students' => $curso->students_count,
-                'teachers' => $curso->teachers_count,
-                'status' => $curso->status,
+                'nombre' => $course->name . ' ' . $course->section,
+                'fecha' => Carbon::parse($course->created_at)->format('d-m-Y'),
+                'hora' => Carbon::parse($course->created_at)->format('H:i:s'),
+                'students' => $course->students_count,
+                'teachers' => $course->teachers_count,
+                'status' => $course->status,
             ];
         }
         return response()->json([
@@ -160,7 +162,9 @@ class CourseController extends Controller
 
     public function getSelectCourses()
     {
-        $courses = Course::where('status', '!=', 0)->get();
+        $courses = Course::where('status', '!=', 0)
+            ->where('college_id', Auth::user()->colleges->first()->college_id)
+            ->get();
 
         $html = '<option value="0">Seleccione un Curso</option>';
         foreach ($courses as $course) {
