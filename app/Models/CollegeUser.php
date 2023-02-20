@@ -9,6 +9,8 @@ class CollegeUser extends Model
 {
     use HasFactory;
 
+    protected $table = "college_users";
+
     protected $fillable = [
         'id',
         'college_id',

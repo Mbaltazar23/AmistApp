@@ -48,8 +48,19 @@ class User extends Authenticatable
         return $this->hasMany(CollegeUser::class);
     }
 
-    public function notifications(){
+    public function notifications()
+    {
         return $this->hasMany(UserNotification::class);
+    }
+
+    public function teachers()
+    {
+        return $this->hasMany(Teacher::class);
+    }
+
+    public function students()
+    {
+        return $this->hasMany(Student::class);
     }
 
 }

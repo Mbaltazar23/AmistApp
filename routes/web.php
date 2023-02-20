@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminColeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CollegeController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
@@ -28,6 +29,8 @@ Route::post('/logout', [AuthController::class, 'logout']);
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::get('/dashboard/profile', [DashboardController::class, 'show'])->name('dashboard.profile');
+    Route::get('/dashboard/getProfile', [DashboardController::class, 'getProfile']);
+    Route::post('/dashboard/putProfile', [DashboardController::class, 'setProfile']);
 
     /* Modulo Categorias */
     Route::get('/categorias', [CategoryController::class, 'index']);
@@ -85,5 +88,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/actions/status/{id}', [ActionController::class, 'setStatus']);
     Route::post('/actions/select/', [ActionController::class, 'getSelectActions']);
     Route::post('/actions/report/', [ActionController::class, 'getReport']);
+
+    /* Modulo Cursos */
+    Route::get('/cursos', [CourseController::class, 'index']);
+    Route::get('/courses', [CourseController::class, 'getCourses']);
+    Route::post('/courses/setCourse', [CourseController::class, 'setCourse']);
+    Route::get('/courses/getCourse/{id}', [CourseController::class, 'getCourse']);
+    Route::post('/courses/status/{id}', [CourseController::class, 'setStatus']);
+    Route::post('/courses/select/', [CourseController::class, 'getSelectCourses']);
+    Route::post('/courses/report/', [CourseController::class, 'getReport']);
 
 });

@@ -17,8 +17,8 @@
             <!-- Notifications Dropdown Menu -->
             <li class="nav-item dropdown user-menu">
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                    <img src="{{ asset('images/' . session('imgPerfil')) }}"
-                        class="user-image img-circle elevation-2" alt="User Image">
+                    <img src="{{ asset('images/' . session('imgPerfil')) }}" class="user-image img-circle elevation-2"
+                        alt="User Image">
                     <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
@@ -50,7 +50,7 @@
         <a href="{{ route('dashboard.index') }}" class="brand-link">
             <img src="{{ asset('images/AmistAppIcon.png') }}" alt="AmistAppLogo"
                 class="brand-image img-circle elevation-3" style="opacity: .8">
-            <span class="brand-text font-weight-light">AmistApp</span>
+            <span class="brand-text font-weight-light">{{ env('NOMBRE_WEB') }}</span>
         </a>
 
         <!-- Sidebar -->
@@ -59,7 +59,7 @@
             <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                 <div class="image">
                     <img src="{{ asset('images/' . session('imgPerfil')) }}" class="img-circle elevation-2"
-                        alt="{{  session('imgPerfil') }}">
+                        alt="{{ session('imgPerfil') }}">
                 </div>
                 <div class="info">
                     <a href="{{ route('dashboard.profile') }}" class="d-block">

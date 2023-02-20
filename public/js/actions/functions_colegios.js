@@ -265,8 +265,8 @@ function generarReporte() {
             pdf.autoTable(columns, data, {
                 startY: 40,
                 styles: {
-                    cellPadding: 10,
-                    fontSize: 8,
+                    cellPadding: 6,
+                    fontSize: 6,
                     font: "helvetica",
                     textColor: [0, 0, 0],
                     fillColor: [255, 255, 255],

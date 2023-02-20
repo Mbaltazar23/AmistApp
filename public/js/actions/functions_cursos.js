@@ -1,17 +1,18 @@
-let tableCategorias;
+let tableCursos;
 let rowTable = "";
 document.addEventListener(
     "DOMContentLoaded",
     function () {
-        tableCategorias = $("#tableCategorias").dataTable({
+        tableCursos = $("#tableCursos").dataTable({
             aProcessing: true,
             aServerSide: true,
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.10.20/i18n/Spanish.json",
             },
+
             columns: [
                 { data: "nro" },
-                { data: "name" },
+                { data: "nombre" },
                 { data: "fecha" },
                 { data: "hora" },
                 { data: "status" },
@@ -23,7 +24,7 @@ document.addEventListener(
                 },
             ],
             ajax: {
-                url: "/categories",
+                url: "/courses",
                 method: "GET",
                 dataSrc: function (json) {
                     if (!json.status) {
@@ -43,25 +44,29 @@ document.addEventListener(
             order: [[0, "asc"]],
         });
 
-        //NUEVA CATEGORIA
-        let formCategoria = document.querySelector("#formCategoria");
-        formCategoria.onsubmit = function (e) {
+        //NUEVO CURSO
+        let formCursos = document.querySelector("#formCursos");
+        formCursos.onsubmit = function (e) {
             e.preventDefault();
-            let strNombre = document.querySelector("#name").value;
-            if (strNombre == "") {
-                swal("Atención", "Debe ingresar un nombre..", "error");
+            let nombreCurso = $("#txtNombre").val();
+            let strSection = $("#selectSection").val();
+            if (nombreCurso == "" || strSection == "") {
+                swal(
+                    "Atención",
+                    "Debe ingresar el nombre y sección al curso.",
+                    "error"
+                );
                 return false;
             } else {
-                let formData = new FormData(formCategoria);
+                let formData = new FormData(formCursos);
                 axios
-                    .post("/categories/setCategoria", formData)
+                    .post("/courses/setCourse", formData)
                     .then(function (response) {
                         if (response.status) {
-                            $("#modalFormCategorias").modal("hide");
-                            formCategoria.reset();
+                            tableCursos.api().ajax.reload();
+                            $("#modalFormCursos").modal("hide");
+                            formCursos.reset();
                             swal("Exito !!", response.data.msg, "success");
-
-                            tableCategorias.api().ajax.reload();
                         } else {
                             swal("Error", response.data.msg, "error");
                         }
@@ -80,24 +85,54 @@ document.addEventListener(
     false
 );
 
-function fntViewInfo(nro, idcategoria) {
+function fntViewInfo(nro, idCurso) {
     axios
-        .get(`/categories/getCategory/${idcategoria}`)
+        .get(`/courses/getCourse/${idCurso}`)
         .then(function (response) {
             if (response.data.status) {
                 let estado =
                     response.data.data.status == 1
                         ? '<span class="badge badge-success">Activo</span>'
                         : '<span class="badge badge-danger">Inactivo</span>';
+
                 document.querySelector("#celNro").innerHTML = nro;
                 document.querySelector("#celNombre").innerHTML =
-                    response.data.data.nombre;
-                document.querySelector("#celEstado").innerHTML = estado;
+                    response.data.data.nombreCur;
                 document.querySelector("#celFecha").innerHTML =
                     response.data.data.fecha;
                 document.querySelector("#celHora").innerHTML =
                     response.data.data.hora;
-                $("#modalViewCategoria").modal("show");
+                document.querySelector("#celEstado").innerHTML = estado;
+                $("#modalViewCurso").modal("show");
+            } else {
+                swal("Error", objData.msg, "error");
+            }
+        })
+        .catch(function (error) {
+            console.log(error);
+            swal("Error", "Ocurrió un error al procesar la petición", "error");
+        });
+}
+
+function fntEditInfo(element, idCurso) {
+    rowTable = element.parentNode.parentNode.parentNode;
+    document.querySelector("#titleModal").innerHTML = "Actualizar Curso";
+    document
+        .querySelector("#btnActionForm")
+        .classList.replace("btn-info", "btn-primary");
+    document.querySelector("#btnText").innerHTML = "  Actualizar";
+    axios
+        .get(`/courses/getCourse/${idCurso}`)
+        .then(function (response) {
+            if (response.data.status) {
+                document.querySelector("#idCurso").value =
+                    response.data.data.id;
+                document.querySelector("#txtNombre").value =
+                    response.data.data.nombre.toString().toLowerCase();
+                document.querySelector("#selectSection").value =
+                    response.data.data.seccion;
+
+                $("#modalFormCursos").modal("show");
             } else {
                 swal("Error", response.data.msg, "error");
             }
@@ -108,37 +143,10 @@ function fntViewInfo(nro, idcategoria) {
         });
 }
 
-function fntEditInfo(element, idcategoria) {
-    rowTable = element.parentNode.parentNode.parentNode;
-    document.querySelector("#titleModal").innerHTML = "Actualizar Categoría";
-    document
-        .querySelector("#btnActionForm")
-        .classList.replace("btn-primary", "btn-info");
-    document.querySelector("#btnText").innerHTML = "Actualizar";
-    axios
-        .get(`/categories/getCategory/${idcategoria}`)
-        .then(function (response) {
-            if (response.data.status) {
-                document.querySelector("#id").value = response.data.data.id;
-                document.querySelector("#name").value = String(
-                    response.data.data.nombre
-                ).toLowerCase();
-
-                $("#modalFormCategorias").modal("show");
-            } else {
-                swal("Error", response.msg, "error");
-            }
-        })
-        .catch(function (error) {
-            console.log(error);
-            swal("Error", "Ocurrió un error al procesar la petición", "error");
-        });
-}
-
-function fntDelInfo(idcategoria) {
+function fntDelInfo(idCurso) {
     swal({
-        title: "Inhabilitar Categoría",
-        text: "¿Realmente quiere inhabilitar al categoría?",
+        title: "Inhabilitar Curso",
+        text: "¿Realmente quiere inhabilitar este curso",
         icon: "warning",
         dangerMode: true,
         buttons: true,
@@ -146,11 +154,11 @@ function fntDelInfo(idcategoria) {
         if (isClosed) {
             let status = 0;
             axios
-                .post(`/categories/status/${idcategoria}`, { status: status })
+                .post(`/courses/status/${idCurso}`, { status: status })
                 .then((response) => {
                     if (response.data.status) {
-                        swal("Inhabilitada!", response.data.msg, "success");
-                        tableCategorias.api().ajax.reload();
+                        swal("Inhabilitado!", response.data.msg, "success");
+                        tableCursos.api().ajax.reload();
                     } else {
                         swal("Atención!", response.data.msg, "error");
                     }
@@ -162,10 +170,10 @@ function fntDelInfo(idcategoria) {
     });
 }
 
-function fntActivateInfo(idcategoria) {
+function fntActivateInfo(idCurso) {
     swal({
-        title: "Habilitar Categoría",
-        text: "¿Realmente quiere habilitar esta categoría?",
+        title: "Habilitar Curso",
+        text: "¿Realmente quiere habilitar este curso?",
         icon: "info",
         dangerMode: true,
         buttons: true,
@@ -173,11 +181,11 @@ function fntActivateInfo(idcategoria) {
         if (isClosed) {
             let status = 1;
             axios
-                .post(`/categories/status/${idcategoria}`, { status: status })
+                .post(`/courses/status/${idCurso}`, { status: status })
                 .then((response) => {
                     if (response.data.status) {
-                        swal("Activada !", response.data.msg, "success");
-                        tableCategorias.api().ajax.reload();
+                        swal("Habilitada !!", response.data.msg, "success");
+                        tableCursos.api().ajax.reload();
                     } else {
                         swal("Atención!", response.data.msg, "error");
                     }
@@ -190,53 +198,59 @@ function fntActivateInfo(idcategoria) {
 }
 
 function openModal() {
-    document.querySelector("#id").value = "";
-    document
-        .querySelector(".modal-header")
-        .classList.replace("headerUpdate", "headerRegister");
+    document.querySelector("#idCurso").value = "";
     document
         .querySelector("#btnActionForm")
-        .classList.replace("btn-info", "btn-primary");
-    document.querySelector("#btnText").innerHTML = "Guardar";
-    document.querySelector("#titleModal").innerHTML = "Nueva Categoría";
-    document.querySelector("#formCategoria").reset();
-    $("#modalFormCategorias").modal("show");
+        .classList.replace("btn-primary", "btn-info");
+    document.querySelector("#btnText").innerHTML = "  Guardar";
+    document.querySelector("#titleModal").innerHTML = "Nuevo Curso";
+    document.querySelector("#formCursos").reset();
+    $("#modalFormCursos").modal("show");
 }
 
 function generarReporte() {
     axios
-        .post("/categories/report")
+        .post("/courses/report/")
         .then(function (response) {
             var fecha = new Date();
-            let categorias = response.data.data;
-            //console.log(notificaciones);
+            var cursos = response.data.data;
             //console.log(tecnicos);
             let estado = "";
             var pdf = new jsPDF();
-            var columns = ["NRO", "NOMBRE", "FECHA", "HORA", "ESTADO"];
+            pdf.text(20, 20, "Reportes de los Cursos Registrados");
             var data = [];
-
-            for (let i = 0; i < categorias.length; i++) {
-                if (categorias[i].status == 1) {
+            var columns = [
+                "NRO",
+                "NOMBRE",
+                "FECHA/HORA",
+                "ESTUDIANTES",
+                "PROFESORES",
+                "ESTADO",
+            ];
+            for (let i = 0; i < cursos.length; i++) {
+                if (cursos[i].status == 1) {
                     estado = "ACTIVO";
                 } else {
                     estado = "INACTIVO";
                 }
                 data[i] = [
-                    i + 1,
-                    categorias[i].nombre,
-                    categorias[i].fecha,
-                    categorias[i].hora,
+                    cursos[i].nro,
+                    cursos[i].nombre,
+                    cursos[i].fecha + " " + cursos[i].hora,
+                    cursos[i].students > 0
+                        ? cursos[i].students
+                        : "No se tiene alumnos registrados",
+                    cursos[i].teachers > 0
+                        ? cursos[i].teachers
+                        : "No se tiene profesores registrados",
                     estado,
                 ];
             }
-
-            pdf.text(20, 20, "Reportes de las Categorias Registradas");
-
+            pdf.autoTable(columns, data, { margin: { top: 40 } });
             pdf.autoTable(columns, data, {
                 startY: 40,
                 styles: {
-                    cellPadding: 9,
+                    cellPadding: 8,
                     fontSize: 8,
                     font: "helvetica",
                     textColor: [0, 0, 0],
@@ -257,7 +271,7 @@ function generarReporte() {
                     "/" +
                     fecha.getFullYear()
             );
-            pdf.save("ReporteCategorias.pdf");
+            pdf.save("ReporteCursos.pdf");
             swal("Exito", "Reporte Imprimido Exitosamente..", "success");
         })
         .catch(function (error) {
