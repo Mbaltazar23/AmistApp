@@ -41,7 +41,7 @@
                                 <span class="delPhoto notBlock">X</span>
                                 <label for="image"></label>
                                 <div>
-                                    <img id="img" src="{{ asset('images/products/product.png') }}">
+                                    <img id="img" />
                                 </div>
                             </div>
                             <div class="upimg">

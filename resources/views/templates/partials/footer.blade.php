@@ -59,5 +59,8 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="{{ asset('js/pages/dashboard.js') }}"></script>
 
+<script>
+    const defaultImage = "{{ asset('images/products/product.png') }}";
+</script>
 
 <script src="{{ asset('js/actions/' . $data['page_functions_js']) }}" type="text/javascript"></script>

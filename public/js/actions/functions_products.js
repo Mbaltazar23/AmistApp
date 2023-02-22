@@ -228,11 +228,9 @@ function fntEditInfo(element, idProducto) {
                     objProducto.image;
                 document.querySelector("#foto_remove").value = 0;
 
-                if (document.querySelector("#img")) {
-                    document.querySelector("#img").src = objProducto.url_image;
-                } else {
-                    document.querySelector(".prevPhoto div").innerHTML =
-                        "<img id='img' src=" + objProducto.url_image + "/>";
+                const imgContainer = document.querySelector(".prevPhoto div");
+                if (imgContainer) {
+                    imgContainer.innerHTML = `<img id="img" src="${objProducto.url_image}"/>`;
                 }
 
                 if (objProducto.image == "product.png") {
@@ -336,6 +334,7 @@ function openModal() {
     document.querySelector("#btnText").innerHTML = "Guardar";
     document.querySelector("#titleModal").innerHTML = "Nuevo Producto";
     document.querySelector("#formProductos").reset();
+    document.querySelector("#img").src = defaultImage;
     $("#modalFormProductos").modal("show");
 }
 

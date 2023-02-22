@@ -164,7 +164,7 @@ class DashboardController extends Controller
                     "Catalogo" => array(
                         "icon" => "fas fa-solid fa-store",
                         "submodulos" => array(
-                            "Productos" => array("pagina" => "productos"),
+                            "Productos" => array("pagina" => "productos-cat"),
                         ),
                     ),
                 );

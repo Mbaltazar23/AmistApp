@@ -9,6 +9,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
@@ -111,9 +112,12 @@ Route::middleware('auth')->group(function () {
     /* Modulo Profesores */
     Route::get('/profesores', [TeacherController::class, 'index']);
     Route::get('/teachers', [TeacherController::class, 'getTeachers']);
-    Route::post('/teachers/setTeacher', [TeacherController::class, 'setTeacher']); 
+    Route::post('/teachers/setTeacher', [TeacherController::class, 'setTeacher']);
     Route::get('/teachers/getTeacher/{id}', [TeacherController::class, 'getTeacher']);
     Route::post('/teachers/status/{id}', [TeacherController::class, 'setStatus']);
     Route::post('/teachers/report', [TeacherController::class, 'getReport']);
-    
+
+    /* Modulo Catalogo */
+    Route::get('/productos-cat', [PurchaseController::class, 'purchases']);
+    Route::get('/purchases', [PurchaseController::class, 'getPurchasesProducts']);
 });
