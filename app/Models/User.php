@@ -10,7 +10,7 @@ class User extends Authenticatable
     protected $table = 'users';
 
     protected $fillable = [
-        'id', 'dni', 'name', 'email', 'phone', 'password', 'created_at', 'address', 'status',
+        'id', 'dni', 'name', 'email', 'phone','points', 'password', 'created_at', 'address', 'status',
     ];
 
     public function getAuthIdentifierName()
@@ -61,6 +61,16 @@ class User extends Authenticatable
     public function students()
     {
         return $this->hasMany(Student::class);
+    }
+
+    public function pointsUserActions()
+    {
+        return $this->hasMany(PointAlumnAction::class, 'user_recept_id', 'id');
+    }
+
+    public function pointsUserActionsSent()
+    {
+        return $this->hasMany(PointAlumnAction::class, 'user_send_id', 'id');
     }
 
 }

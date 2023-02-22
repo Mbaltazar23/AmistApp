@@ -9,6 +9,8 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -86,8 +88,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/actions/setAction', [ActionController::class, 'setAction']);
     Route::get('/actions/getAction/{id}', [ActionController::class, 'getAction']);
     Route::post('/actions/status/{id}', [ActionController::class, 'setStatus']);
-    Route::post('/actions/select/', [ActionController::class, 'getSelectActions']);
-    Route::post('/actions/report/', [ActionController::class, 'getReport']);
+    Route::post('/actions/select', [ActionController::class, 'getSelectActions']);
+    Route::post('/actions/report', [ActionController::class, 'getReport']);
 
     /* Modulo Cursos */
     Route::get('/cursos', [CourseController::class, 'index']);
@@ -95,7 +97,23 @@ Route::middleware('auth')->group(function () {
     Route::post('/courses/setCourse', [CourseController::class, 'setCourse']);
     Route::get('/courses/getCourse/{id}', [CourseController::class, 'getCourse']);
     Route::post('/courses/status/{id}', [CourseController::class, 'setStatus']);
-    Route::post('/courses/select/', [CourseController::class, 'getSelectCourses']);
-    Route::post('/courses/report/', [CourseController::class, 'getReport']);
+    Route::post('/courses/select', [CourseController::class, 'getSelectCourses']);
+    Route::post('/courses/report', [CourseController::class, 'getReport']);
 
+    /* Modulo Alumnos */
+    Route::get('/alumnos', [StudentController::class, 'index']);
+    Route::get('/students', [StudentController::class, 'getStudents']);
+    Route::post('/students/setStudent', [StudentController::class, 'setStudent']);
+    Route::get('/students/getStudent/{id}', [StudentController::class, 'getStudent']);
+    Route::post('/students/status/{id}', [StudentController::class, 'setStatus']);
+    Route::post('/students/report', [StudentController::class, 'getReport']);
+
+    /* Modulo Profesores */
+    Route::get('/profesores', [TeacherController::class, 'index']);
+    Route::get('/teachers', [TeacherController::class, 'getTeachers']);
+    Route::post('/teachers/setTeacher', [TeacherController::class, 'setTeacher']); 
+    Route::get('/teachers/getTeacher/{id}', [TeacherController::class, 'getTeacher']);
+    Route::post('/teachers/status/{id}', [TeacherController::class, 'setStatus']);
+    Route::post('/teachers/report', [TeacherController::class, 'getReport']);
+    
 });

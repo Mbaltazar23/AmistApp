@@ -67,7 +67,7 @@ window.addEventListener(
                     axios
                         .post("/products/setProduct", formData)
                         .then(function (response) {
-                            if (response.status) {
+                            if (response.data.status) {
                                 $("#modalFormProductos").modal("hide");
                                 formProductos.reset();
                                 swal("Exito !!", response.data.msg, "success");

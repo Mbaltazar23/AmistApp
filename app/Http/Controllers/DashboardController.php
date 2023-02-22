@@ -20,8 +20,12 @@ class DashboardController extends Controller
     public function index()
     {
         $cardsPanel = $this->cardsPanelDashboard();
+        $page_tag = Auth::user()->roles->first()->role != env("ROLADMIN") ?
+        env("NOMBRE_WEB") . "/" . env("NOMBRE_DASHBOARD") . ' - ' . Auth::user()->roles->first()->role :
+        env("NOMBRE_WEB") . " - Dashboard";
         $data = [
             'page_tag' => env("NOMBRE_WEB") . " - Dashboard",
+            'page_title' => $page_tag,
             'page_functions_js' => 'functions_dashboard.js',
         ];
         if (!Auth::check()) {
@@ -54,7 +58,7 @@ class DashboardController extends Controller
                     'dni' => $user->dni,
                     'nombre' => $user->name,
                     'email' => $user->email,
-                    'direccion' => $user->address != "" ? $user->address : "",
+                    'direccion' => $user->address ? $user->address : "",
                     'telefono' => $user->phone,
                     'fecha' => $user->created_at->format('d-m-Y'),
                     'hora' => $user->created_at->format('H:i:s'),
@@ -164,6 +168,22 @@ class DashboardController extends Controller
                         ),
                     ),
                 );
+            } else if ($role->role == env("ROLALU")) {
+                $navAdmin = array(
+                    "Educacion" => array(
+                        "icon" => "fas fa-regular fa-school",
+                        "submodulos" => array(
+                            "Compañeros" => array("pagina" => "alumnos"),
+                        ),
+                    ),
+                    "Catalogo" => array(
+                        "icon" => "fas fa-solid fa-store",
+                        "submodulos" => array(
+                            "Productos" => array("pagina" => "catalogo"),
+                            "Mis Productos" => array("pagina" => "productos-adquiridos"),
+                        ),
+                    ),
+                );
             }
         }
         return $navAdmin;
@@ -227,7 +247,7 @@ class DashboardController extends Controller
                         "title" => "% de Alumnos registrados",
                         "icon" => "fas fa fa-users",
                         "color" => "bg-dark",
-                        "value" => $porcentage_Students,
+                        "value" => $porcentage_Students . "%",
                         "url" => "alumnos",
                     ),
                     "count teachers activates" => array(
@@ -252,6 +272,34 @@ class DashboardController extends Controller
                         "url" => "alumnos",
                     ),
                 );
+            } else if ($role->role == env("ROLALU")) {
+                $idUser = Auth::user()->id;
+                $pointsAvailable = $this->pointsAvailableAlum($idUser);
+                $porcentageProductsPurchases = $this->porcentageNotificationsForAlum($idUser);
+                $productosPurchases = $this->countProductsPurchasesAlum($idUser);
+
+                $cardsPanel = array(
+                    "points Alumn" => array(
+                        "title" => "Puntos disponibles",
+                        "icon" => "fas fa fa-star-half-alt",
+                        "color" => "bg-dark",
+                        "value" => $pointsAvailable,
+                        "url" => "compañeros",
+                    ),
+                    "porcentage notifications for student" => array(
+                        "title" => "% de Notificaciones contestadas",
+                        "icon" => "fa fa-envelope-open-text",
+                        "color" => "bg-success",
+                        "value" => $porcentageProductsPurchases. "%",
+                        "url" => "productos",
+                    ),
+                    "registered_colleges" => array(
+                        "title" => "Cantidad de Productos adquiridos",
+                        "icon" => "fas fa fa-cube",
+                        "color" => "bg-blue",
+                        "value" => $productosPurchases,
+                        "url" => "catalogo",
+                    ));
             }
         }
         return $cardsPanel;
@@ -322,25 +370,32 @@ class DashboardController extends Controller
     public function porcentajeStudentsCourse($collegeId)
     {
         $percentage = 0;
+        $activeStatus = 1; // Este valor representa el estado de un estudiante activo
 
         $studentsCount = Student::whereHas('course.college', function ($query) use ($collegeId) {
             $query->where('id', $collegeId);
+        })->whereHas('user', function ($query) use ($activeStatus) {
+            $query->where('status', $activeStatus);
         })->count();
 
         $coursesCount = Course::where('college_id', $collegeId)->count();
 
         if ($coursesCount > 0) {
-            $percentage = ($studentsCount / $coursesCount) * 100;
+            $percentage = ($studentsCount / ($coursesCount * 30)) * 100; // Se asume que un curso tiene una duración de 30 días
         }
 
-        return $percentage;
+        return round($percentage, 2);
     }
 
     public function countsTeachersCourse($collegeId)
     {
         $teachersCount = Teacher::whereHas('course.college', function ($query) use ($collegeId) {
             $query->where('id', $collegeId);
-        })->count();
+        })
+            ->whereHas('user', function ($query) {
+                $query->where('status', 1);
+            })
+            ->count();
 
         return $teachersCount;
     }
@@ -392,5 +447,33 @@ class DashboardController extends Controller
             $percentActions = 0;
         }
         return $percentActions;
+    }
+
+    //Cards Panel of Dashboard  : Alumn
+    public function pointsAvailableAlum($idAlum)
+    {
+        $user = User::find($idAlum);
+        $pointsAvailable = $user->points;
+        return $pointsAvailable;
+    }
+
+    public function porcentageNotificationsForAlum($idAlum)
+    {
+        $percentAnswered = 0;
+        $user = User::with('notifications')->find($idAlum);
+        $totalNotifications = $user->notifications->count();
+        $answeredNotifications = $user->notifications->where('status', 1)->count();
+        if ($answeredNotifications > 0) {
+            $percentAnswered = round(($answeredNotifications / $totalNotifications) * 100);
+        }
+        return $percentAnswered;
+    }
+
+    public function countProductsPurchasesAlum($idAlum)
+    {
+        $productsBought = 0;
+        $user = User::with('purchases')->find($idAlum);
+        $productsBought = $user->purchases->count();
+        return $productsBought;
     }
 }

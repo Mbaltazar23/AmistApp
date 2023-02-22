@@ -1,20 +1,19 @@
-let tableCursos;
+let tableTutors, tableAlumns;
 let rowTable = "";
 document.addEventListener(
     "DOMContentLoaded",
     function () {
-        tableCursos = $("#tableCursos").dataTable({
+        tableTutors = $("#tableProfesors").dataTable({
             aProcessing: true,
             aServerSide: true,
             language: {
                 url: "//cdn.datatables.net/plug-ins/1.10.20/i18n/Spanish.json",
             },
-
             columns: [
-                { data: "nro" },
+                { data: "dni" },
                 { data: "nombre" },
-                { data: "fecha" },
-                { data: "hora" },
+                { data: "email" },
+                { data: "curso" },
                 { data: "status" },
                 {
                     data: "options",
@@ -24,7 +23,7 @@ document.addEventListener(
                 },
             ],
             ajax: {
-                url: "/courses",
+                url: "/teachers",
                 method: "GET",
                 dataSrc: function (json) {
                     if (!json.status) {
@@ -44,28 +43,43 @@ document.addEventListener(
             order: [[0, "asc"]],
         });
 
-        //NUEVO CURSO
-        let formCursos = document.querySelector("#formCursos");
-        formCursos.onsubmit = function (e) {
+        // NUEVO TUTOR
+        let formTutor = document.querySelector("#formTutor");
+        formTutor.onsubmit = function (e) {
             e.preventDefault();
-            let nombreCurso = $("#txtNombre").val();
-            let strSection = $("#selectSection").val();
-            if (nombreCurso == "" || strSection == "") {
-                swal(
-                    "Atención",
-                    "Debe ingresar el nombre y sección al curso.",
-                    "error"
-                );
+            let txtRutT = $("#txtRutT").val();
+            let nombreRol = $("#txtNombres").val();
+            let correo = $("#txtCorreoT").val();
+            let listCurso = $("#listCurso").val();
+            let telefono = $("#txtTelefono").val();
+            let regexCorreo =
+                /[\w-\.]{2,}@([\w-]{2,}\.)*([\w-]{2,}\.)[\w-]{2,4}/;
+            var regulTele = /^(\+?56)?(\s?)(0?9)(\s?)[9876543]\d{7}$/;
+
+            if (
+                txtRutT == "" ||
+                nombreRol == "" ||
+                listCurso == "" ||
+                correo == "" ||
+                telefono == ""
+            ) {
+                swal("Atención", "Todos los campos son obligatorios.", "error");
+                return false;
+            } else if (!regexCorreo.test(correo)) {
+                swal("Error !!", "El correo ingresado no es valido..", "error");
+                return false;
+            } else if (!regulTele.test(telefono)) {
+                swal("Error !!", "El telefono ingresado no es valido", "error");
                 return false;
             } else {
-                let formData = new FormData(formCursos);
+                let formData = new FormData(formTutor);
                 axios
-                    .post("/courses/setCourse", formData)
+                    .post("/teachers/setTeacher", formData)
                     .then(function (response) {
                         if (response.data.status) {
-                            tableCursos.api().ajax.reload();
-                            $("#modalFormCursos").modal("hide");
-                            formCursos.reset();
+                            $("#modalFormTutores").modal("hide");
+                            formTutor.reset();
+                            tableTutors.api().ajax.reload();
                             swal("Exito !!", response.data.msg, "success");
                         } else {
                             swal("Error", response.data.msg, "error");
@@ -81,13 +95,28 @@ document.addEventListener(
                     });
             }
         };
+
+        fntSelectsCourses();
     },
     false
 );
 
-function fntViewInfo(nro, idCurso) {
+function fntSelectsCourses() {
+    if (document.querySelector("#listCurso")) {
+        axios
+            .post("/courses/select")
+            .then((response) => {
+                $(".selectCursos select").html(response.data).fadeIn();
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+}
+
+function fntViewInfo(idTutor) {
     axios
-        .get(`/courses/getCourse/${idCurso}`)
+        .get(`/teachers/getTeacher/${idTutor}`)
         .then(function (response) {
             if (response.data.status) {
                 let estado =
@@ -95,15 +124,19 @@ function fntViewInfo(nro, idCurso) {
                         ? '<span class="badge badge-success">Activo</span>'
                         : '<span class="badge badge-danger">Inactivo</span>';
 
-                document.querySelector("#celNro").innerHTML = nro;
-                document.querySelector("#celNombre").innerHTML =
-                    response.data.data.nombreCur;
-                document.querySelector("#celFecha").innerHTML =
-                    response.data.data.fecha;
-                document.querySelector("#celHora").innerHTML =
-                    response.data.data.hora;
-                document.querySelector("#celEstado").innerHTML = estado;
-                $("#modalViewCurso").modal("show");
+                document.querySelector("#celRutT").innerHTML =
+                    response.data.data.dni;
+                document.querySelector("#celNombresT").innerHTML =
+                    response.data.data.nombre;
+                document.querySelector("#celCorreoT").innerHTML =
+                    response.data.data.email;
+                document.querySelector("#celTelefonoT").innerHTML =
+                    response.data.data.telefono;
+                document.querySelector("#celDireccionT").innerHTML =
+                    response.data.data.direccion != ""  ? response.data.data.direccion :"No hay una direccion registrada";
+                document.querySelector("#celCursoT").innerHTML = response.data.data.curso;    
+                document.querySelector("#celEstadoT").innerHTML = estado;
+                $("#modalViewTutor").modal("show");
             } else {
                 swal("Error", objData.msg, "error");
             }
@@ -114,25 +147,33 @@ function fntViewInfo(nro, idCurso) {
         });
 }
 
-function fntEditInfo(element, idCurso) {
+function fntEditInfo(element, idTutor) {
     rowTable = element.parentNode.parentNode.parentNode;
-    document.querySelector("#titleModal").innerHTML = "Actualizar Curso";
+    document.querySelector("#titleModal").textContent = "Actualizar Profesor";
     document
         .querySelector("#btnActionForm")
         .classList.replace("btn-info", "btn-primary");
-    document.querySelector("#btnText").innerHTML = "  Actualizar";
+    document.querySelector("#btnText").textContent = "  Actualizar";
     axios
-        .get(`/courses/getCourse/${idCurso}`)
+        .get(`/teachers/getTeacher/${idTutor}`)
         .then(function (response) {
             if (response.data.status) {
-                document.querySelector("#idCurso").value =
+                document.querySelector("#idProfe").value =
                     response.data.data.id;
-                document.querySelector("#txtNombre").value =
+                document.querySelector("#txtRutT").value =
+                    response.data.data.dni;
+                document.querySelector("#txtNombres").value =
                     response.data.data.nombre.toString().toLowerCase();
-                document.querySelector("#selectSection").value =
-                    response.data.data.seccion;
 
-                $("#modalFormCursos").modal("show");
+                document.querySelector("#txtCorreoT").value =
+                    response.data.data.email.toString().toLowerCase();
+                document.querySelector("#txtTelefono").value =
+                    response.data.data.telefono;
+                document.querySelector("#txtDireccion").value =
+                    response.data.data.direccion;
+                document.querySelector("#listCurso").value = response.data.data.idCurso;
+                validadorRut("txtRutT");
+                $("#modalFormTutores").modal("show");
             } else {
                 swal("Error", response.data.msg, "error");
             }
@@ -143,10 +184,10 @@ function fntEditInfo(element, idCurso) {
         });
 }
 
-function fntDelInfo(idCurso) {
+function fntDelInfo(idTutor) {
     swal({
-        title: "Inhabilitar Curso",
-        text: "¿Realmente quiere inhabilitar este curso",
+        title: "Inhabilitar Profesor",
+        text: "¿Realmente quiere inhabilitar a este profesor?",
         icon: "warning",
         dangerMode: true,
         buttons: true,
@@ -154,11 +195,11 @@ function fntDelInfo(idCurso) {
         if (isClosed) {
             let status = 0;
             axios
-                .post(`/courses/status/${idCurso}`, { status: status })
+                .post(`/teachers/status/${idTutor}`, { status: status })
                 .then((response) => {
                     if (response.data.status) {
-                        swal("Inhabilitado!", response.data.msg, "success");
-                        tableCursos.api().ajax.reload();
+                        swal("Inhabilitada!", response.data.msg, "success");
+                        tableTutors.api().ajax.reload();
                     } else {
                         swal("Atención!", response.data.msg, "error");
                     }
@@ -170,10 +211,10 @@ function fntDelInfo(idCurso) {
     });
 }
 
-function fntActivateInfo(idCurso) {
+function fntActivateInfo(idTutor) {
     swal({
-        title: "Habilitar Curso",
-        text: "¿Realmente quiere habilitar este curso?",
+        title: "Habilitar Profesor",
+        text: "¿Realmente quiere habilitar este profesor?",
         icon: "info",
         dangerMode: true,
         buttons: true,
@@ -181,11 +222,11 @@ function fntActivateInfo(idCurso) {
         if (isClosed) {
             let status = 1;
             axios
-                .post(`/courses/status/${idCurso}`, { status: status })
+                .post(`/teachers/status/${idTutor}`, { status: status })
                 .then((response) => {
                     if (response.data.status) {
                         swal("Habilitada !!", response.data.msg, "success");
-                        tableCursos.api().ajax.reload();
+                        tableTutors.api().ajax.reload();
                     } else {
                         swal("Atención!", response.data.msg, "error");
                     }
@@ -198,55 +239,53 @@ function fntActivateInfo(idCurso) {
 }
 
 function openModal() {
-    document.querySelector("#idCurso").value = "";
+    document.querySelector("#idProfe").value = "";
     document
         .querySelector("#btnActionForm")
         .classList.replace("btn-primary", "btn-info");
-    document.querySelector("#btnText").innerHTML = "  Guardar";
-    document.querySelector("#titleModal").innerHTML = "Nuevo Curso";
-    document.querySelector("#formCursos").reset();
-    $("#modalFormCursos").modal("show");
+    document.querySelector("#btnText").textContent = "  Guardar";
+    document.querySelector("#titleModal").textContent = "Nuevo Profesor";
+    document.querySelector("#formTutor").reset();
+    validadorRut("txtRutT");
+    $("#modalFormTutores").modal("show");
 }
 
-function generarReporte() {
+function generarReportTutores() {
     axios
-        .post("/courses/report/")
+        .post("/teachers/report")
         .then(function (response) {
             var fecha = new Date();
-            var cursos = response.data.data;
-            //console.log(tecnicos);
+            var tutores = response.data.data;
+            // console.log(tecnicos);
             let estado = "";
             var pdf = new jsPDF();
-            pdf.text(20, 20, "Reportes de los Cursos Registrados");
+            pdf.text(20, 20, "Reportes de los Tutores Registrados");
             var data = [];
             var columns = [
-                "NRO",
+                "RUT",
                 "NOMBRE",
-                "FECHA/HORA",
-                "ESTUDIANTES",
-                "PROFESORES",
+                "CORREO",
+                "CURSO",
+                "DIRECCION",
                 "ESTADO",
             ];
-            for (let i = 0; i < cursos.length; i++) {
-                if (cursos[i].status == 1) {
+            for (let i = 0; i < tutores.length; i++) {
+                if (tutores[i].status == 1) {
                     estado = "ACTIVO";
                 } else {
                     estado = "INACTIVO";
                 }
                 data[i] = [
-                    cursos[i].nro,
-                    cursos[i].nombre,
-                    cursos[i].fecha + " " + cursos[i].hora,
-                    cursos[i].students > 0
-                        ? cursos[i].students
-                        : "No se tiene alumnos registrados",
-                    cursos[i].teachers > 0
-                        ? cursos[i].teachers
-                        : "No se tiene profesores registrados",
+                    tutores[i].dni,
+                    tutores[i].nombre,
+                    tutores[i].correo,
+                    tutores[i].curso,
+                    tutores[i].direccion != ""
+                        ? tutores[i].direccion
+                        : "No se cuenta con una direccion registrada",
                     estado,
                 ];
             }
-            pdf.autoTable(columns, data, { margin: { top: 40 } });
             pdf.autoTable(columns, data, {
                 startY: 40,
                 styles: {
@@ -271,7 +310,8 @@ function generarReporte() {
                     "/" +
                     fecha.getFullYear()
             );
-            pdf.save("ReporteCursos.pdf");
+
+            pdf.save("ReporteProfesores.pdf");
             swal("Exito", "Reporte Imprimido Exitosamente..", "success");
         })
         .catch(function (error) {

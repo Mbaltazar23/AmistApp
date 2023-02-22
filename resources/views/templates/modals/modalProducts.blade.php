@@ -36,23 +36,25 @@
                     </div>
                     <div class="col-md-6">
                         <div class="photo">
-                          <label for="image">Agregar Portada</label>
-                          <div class="prevPhoto">
-                            <span class="delPhoto notBlock">X</span>
-                            <label for="image"></label>
-                            <div>
-                              <img id="img" src="{{ asset('images/products/product.png') }}">
+                            <label for="image">Agregar Portada</label>
+                            <div class="prevPhoto">
+                                <span class="delPhoto notBlock">X</span>
+                                <label for="image"></label>
+                                <div>
+                                    <img id="img" src="{{ asset('images/products/product.png') }}">
+                                </div>
                             </div>
-                          </div>
-                          <div class="upimg">
-                            <input type="file" name="image" id="image">
-                          </div>
-                          <div id="form_alert"></div>
+                            <div class="upimg">
+                                <input type="file" name="image" id="image">
+                            </div>
+                            <div id="form_alert"></div>
                         </div>
-                      </div>
+                    </div>
                     <div class="modal-footer">
-                        <button id="btnActionForm" class="btn btn-primary" type="submit"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;<span id="btnText">Guardar</span></button>
-                        <button class="btn btn-danger" type="button" data-dismiss="modal"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Cerrar</button>
+                        <button id="btnActionForm" class="btn btn-primary" type="submit"><i
+                                class="fa fa-check-circle"></i>&nbsp;&nbsp;<span id="btnText">Guardar</span></button>
+                        <button class="btn btn-danger" type="button" data-dismiss="modal"><i
+                                class="fa fa-times-circle"></i>&nbsp;&nbsp;Cerrar</button>
                     </div>
                 </form>
             </div>
@@ -74,35 +76,35 @@
                 <table class="table table-bordered">
                     <tbody>
                         <tr>
-                            <td>Nombre:</td>
+                            <td><strong>Nombre:</strong></td>
                             <td id="celNombre"></td>
                         </tr>
                         <tr>
-                            <td>Precio:</td>
+                            <td><strong>Precio:</strong></td>
                             <td id="celPrecio"></td>
                         </tr>
                         <tr>
-                            <td>Categoría:</td>
+                            <td><strong>Categoría:</strong></td>
                             <td id="celCategoria"></td>
                         </tr>
                         <tr>
-                            <td>Stock:</td>
+                            <td><strong>Stock:</strong></td>
                             <td id="celStock"></td>
                         </tr>
                         <tr>
-                            <td>Fecha:</td>
+                            <td><strong>Fecha:</strong></td>
                             <td id="celFecha"></td>
                         </tr>
                         <tr>
-                            <td>Hora:</td>
+                            <td><strong>Hora:</strong></td>
                             <td id="celHora"></td>
                         </tr>
                         <tr>
-                            <td>Status:</td>
+                            <td><strong>Status:</strong></td>
                             <td id="celStatus"></td>
                         </tr>
                         <tr>
-                            <td>Foto:</td>
+                            <td><strong>Foto:</strong></td>
                             <td id="celFoto">
                             </td>
                         </tr>
@@ -112,4 +114,3 @@
         </div>
     </div>
 </div>
-

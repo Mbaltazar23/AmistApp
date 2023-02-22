@@ -174,7 +174,7 @@ document.addEventListener(
                                 title: titleMessage,
                             })
                             .then(function (response) {
-                                if (response.status) {
+                                if (response.data.status) {
                                     tableNotificaciones.api().ajax.reload();
                                     $("#modalFormNotificaciones").modal("hide");
                                     swal(
@@ -243,7 +243,7 @@ document.addEventListener(
                             Answers: questionAndAnswers,
                         })
                         .then(function (response) {
-                            if (response.status) {
+                            if (response.data.status) {
                                 tableQuestions.api().ajax.reload();
                                 $("#modalFormQuestions").modal("hide");
                                 cerrarModal();
@@ -291,7 +291,7 @@ document.addEventListener(
                             pointsQuestion: points,
                         })
                         .then(function (response) {
-                            if (response.status) {
+                            if (response.data.status) {
                                 tableNotificaciones.api().ajax.reload();
                                 $("#modalFormNotificacionTitle").modal("hide");
                                 cerrarModal();
@@ -376,7 +376,7 @@ function fntViewInfo(nro, idNotificacion) {
                 document.querySelector("#celNombre").innerHTML =
                     response.data.data.mensaje;
                 document.querySelector("#celTipo").innerHTML =
-                    response.data.data.tipo;
+                    response.data.data.type;
                 document.querySelector("#celPuntos").innerHTML =
                     response.data.data.puntos;
                 document.querySelector("#celFecha").innerHTML =
@@ -538,7 +538,7 @@ function viewFormTitleNotificacion(arrNotificacion) {
     document.querySelector("#titleModalT").innerHTML =
         "Actualizar Titulo de la Notificacion";
     document.querySelector("#idNotificacionT").value = arrNotificacion.id;
-    document.querySelector("#tipoNotificacion").value = arrNotificacion.tipo;
+    document.querySelector("#tipoNotificacion").value = arrNotificacion.type;
     document.querySelector("#txtQuestion").value = arrNotificacion.pregunta;
     document.querySelector("#title").value = arrNotificacion.mensaje
         .toString()
@@ -743,7 +743,7 @@ function generarReporte() {
                     lineWidth: 0.1,
                     halign: "center",
                     valign: "middle",
-                }
+                },
             });
 
             pdf.text(

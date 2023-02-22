@@ -168,7 +168,7 @@ class CourseController extends Controller
 
         $html = '<option value="0">Seleccione un Curso</option>';
         foreach ($courses as $course) {
-            $html .= '<option value="' . $course->id . '">' . $course->name . '' . $course->section . '</option>';
+            $html .= '<option value="' . $course->id . '">' . $course->name . ' ' . $course->section . '</option>';
         }
 
         return $html;

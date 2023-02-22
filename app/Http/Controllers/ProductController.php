@@ -99,9 +99,9 @@ class ProductController extends Controller
             if (($nombre_foto == '' && $request->input('foto_remove') == 1 && $request->input('foto_actual') != 'product.png') || ($nombre_foto != '' && $request->input('foto_actual') != 'product.png')) {
                 $this->deleteFile($request->input('foto_actual'), "products");
             }
-            return response()->json(['status' => true, 'msg' => 'Producto actualizado con éxito']);
+            return response()->json(['status' => true, 'msg' => 'Producto actualizado Exitosamente !!']);
         } else {
-            // insertar categoría
+            // insertar producto
             $product = new Product();
             $product->name = $name;
             $product->category_id = $category;
@@ -113,7 +113,7 @@ class ProductController extends Controller
             if ($nombre_foto != '') {
                 $foto->move(public_path('images/products'), $imgPortada);
             }
-            return response()->json(['status' => true, 'msg' => 'Producto agregado con éxito']);
+            return response()->json(['status' => true, 'msg' => 'Producto registrado Exitosamente !!']);
         }
     }
 

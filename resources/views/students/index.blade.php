@@ -1,6 +1,6 @@
 @extends('templates.base')
 @section('content')
-    @include('templates.modals.modalCourses')
+    @include('templates.modals.modalStudents')
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <section class="content-header">
@@ -11,7 +11,8 @@
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Inicio</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Inicio</a>
+                            </li>
                             <li class="breadcrumb-item active">{{ $data['page_title'] }}</li>
                         </ol>
                     </div>
@@ -41,13 +42,14 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <table class="table table-striped table-responsive-lg" id="tableCursos" style="width: 100%">
+                                <table class="table table-striped table-responsive-lg" id="tableAlumns" style="width:100%">
                                     <thead>
                                         <tr>
-                                            <th>Nro</th>
+                                            <th>Rut</th>
                                             <th>Nombre</th>
-                                            <th>Fecha</th>
-                                            <th>Hora</th>
+                                            <th>Correo</th>
+                                            <th>Telefono</th>
+                                            <th>Curso</th>
                                             <th>Status</th>
                                             <th>Acciones</th>
                                         </tr>

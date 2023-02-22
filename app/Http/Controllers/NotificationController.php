@@ -163,6 +163,7 @@ class NotificationController extends Controller
             'id' => $notificacion->id,
             'mensaje' => $notificacion->message,
             'tipo' => $notificacion->type,
+            'type' => $notificacion->type != "Video/Message" ? "Pregunta" : "Video/Mensaje",
             'puntos' => $notificacion->points,
             'fecha' => $notificacion->created_at->format('d/m/Y'),
             'hora' => $notificacion->created_at->format('H:i:s'),

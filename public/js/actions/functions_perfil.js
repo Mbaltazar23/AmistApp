@@ -50,7 +50,7 @@ document.addEventListener(
                 axios
                     .post("/dashboard/putProfile", formData)
                     .then(function (response) {
-                        if (response.status) {
+                        if (response.data.status) {
                             swal({
                                 title: "Exito !",
                                 text: response.data.msg,

@@ -71,7 +71,7 @@ document.addEventListener(
                 axios
                     .post("/colleges/setCollege", formData)
                     .then(function (response) {
-                        if (response.status) {
+                        if (response.data.status) {
                             tableColegio.api().ajax.reload();
                             $("#modalFormColegios").modal("hide");
                             formColegio.reset();

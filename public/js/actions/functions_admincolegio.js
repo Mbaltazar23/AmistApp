@@ -83,7 +83,7 @@ document.addEventListener(
                 axios
                     .post("/adminsColleges/setAdmin", formData)
                     .then(function (response) {
-                        if (response.status) {
+                        if (response.data.status) {
                             tableAdmins.api().ajax.reload();
                             $("#modalFormAdmins").modal("hide");
                             formAdmin.reset();

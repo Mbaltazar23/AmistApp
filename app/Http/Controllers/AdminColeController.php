@@ -26,7 +26,7 @@ class AdminColeController extends Controller
     public function getAdmins()
     {
         $usersAdmins = User::whereHas('roles', function ($query) {
-            $query->where('role', 'Administrador de Colegio');
+            $query->where('role', env("ROLADMINCOLE"));
         })->get();
 
         $data = [];
@@ -78,7 +78,7 @@ class AdminColeController extends Controller
         $name = ucwords($request->input('txtNombre'));
         $email = ucwords($request->input('txtEmail'));
         $phone = $request->input('txtTelefono');
-        $password = bcrypt($name);
+        $password = bcrypt(ucwords($name));
         $address = $request->input('txtDireccion');
         $rolA = env("ROLADMINCOLE");
 

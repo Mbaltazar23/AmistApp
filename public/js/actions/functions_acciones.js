@@ -62,7 +62,7 @@ document.addEventListener(
                 axios
                     .post("/actions/setAction", formData)
                     .then(function (response) {
-                        if (response.status) {
+                        if (response.data.status) {
                             $("#modalFormAcciones").modal("hide");
                             formAccion.reset();
                             swal("Exito !!", response.data.msg, "success");

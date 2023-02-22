@@ -44,30 +44,29 @@
                 <table class="table table-bordered">
                     <tbody>
                         <tr>
-                            <td>Nro:</td>
+                            <td><strong>Nro:</strong></td>
                             <td id="celNro"></td>
                         </tr>
                         <tr>
-                            <td>Nombre:</td>
+                            <td><strong>Nombre:</strong></td>
                             <td id="celNombre"></td>
                         </tr>
                         <tr>
-                            <td>Puntaje:</td>
+                            <td><strong>Puntaje:</strong></td>
                             <td id="celPuntaje"></td>
                         </tr>
                         <tr>
-                            <td>Fecha Creada:</td>
+                            <td><strong>Fecha Creada:</strong></td>
                             <td id="celFecha"></td>
                         </tr>
                         <tr>
-                            <td>Hora Creada:</td>
+                            <td><strong>Hora Creada:</strong></td>
                             <td id="celHora"></td>
                         </tr>
                         <tr>
-                            <td>Estado:</td>
+                            <td><strong>Estado:</strong></td>
                             <td id="celEstado"></td>
                         </tr>
-
                     </tbody>
                 </table>
             </div>

@@ -31,7 +31,7 @@
                             <div class="input-group mb-15">
                                 <div class="input-group-prepend">
                                     <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
-                                        <?= $data['page_title'] ?>
+                                        {{$data['page_title']}} 
                                     </button>
                                     <div class="dropdown-menu" role="menu">
                                         <a class="dropdown-item" onclick="openModal();">Nuevo</a>
