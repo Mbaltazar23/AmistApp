@@ -19,6 +19,7 @@ class CreatePurchasesTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('product_id');
             $table->integer('points')->default(0); // se añade el campo "points" con valor default de 0
+            $table->integer('stock')->default(1);
 
             $table->foreign('product_id')
                 ->references('id')->on('products')

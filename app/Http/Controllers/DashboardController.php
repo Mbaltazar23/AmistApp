@@ -13,7 +13,6 @@ use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -184,6 +183,8 @@ class DashboardController extends Controller
                         ),
                     ),
                 );
+            } else if ($role->role == env("ROLPROFE")) {
+
             }
         }
         return $navAdmin;
@@ -290,15 +291,15 @@ class DashboardController extends Controller
                         "title" => "% de Notificaciones contestadas",
                         "icon" => "fa fa-envelope-open-text",
                         "color" => "bg-success",
-                        "value" => $porcentageProductsPurchases. "%",
-                        "url" => "productos",
+                        "value" => $porcentageProductsPurchases . "%",
+                        "url" => "compañeros",
                     ),
                     "registered_colleges" => array(
                         "title" => "Cantidad de Productos adquiridos",
                         "icon" => "fas fa fa-cube",
                         "color" => "bg-blue",
                         "value" => $productosPurchases,
-                        "url" => "catalogo",
+                        "url" => "productos-adquiridos",
                     ));
             }
         }
@@ -402,28 +403,16 @@ class DashboardController extends Controller
 
     public function porcentageProductsPurchases($collegeId)
     {
-        $porcentage_productsPurchases = 0;
-        $collegeId = Auth::user()->colleges->first()->college_id;
-        $totalPurchases = Purchase::whereHas('user.colleges', function ($query) use ($collegeId) {
-            $query->where('college_id', $collegeId);
-        })->count();
+        $percentage = 0;
+        $totalStock = Purchase::sum('stock'); // Stock total de todos los purchases
 
-        $productPurchases = Purchase::select('product_id', DB::raw('count(*) as total'))
-            ->whereHas('user.colleges', function ($query) use ($collegeId) {
-                $query->where('college_id', $collegeId);
-            })
-            ->groupBy('product_id')
-            ->orderBy('total', 'desc')
-            ->limit(1)
-            ->first();
-
-        if ($totalPurchases > 0) {
-            $porcentage_productsPurchases = ($productPurchases->total / $totalPurchases) * 100;
-        } else {
-            $porcentage_productsPurchases = 0;
-        }
-
-        return $porcentage_productsPurchases;
+        $collegeStock = Purchase::whereHas('user.students.course.college', function ($q) use ($collegeId) {
+            $q->where('id', $collegeId);
+        })->sum('stock'); // Stock total de los purchases pertenecientes al colegio
+        
+        $percentage = ($collegeStock / $totalStock) * 100; // Porcentaje de los productos vendidos al colegio
+        
+        return $percentage;
     }
 
     public function porcentageStudentPerformActions($collegeId)
@@ -473,7 +462,7 @@ class DashboardController extends Controller
     {
         $productsBought = 0;
         $user = User::with('purchases')->find($idAlum);
-        $productsBought = $user->purchases->count();
+        $productsBought = $user->purchases->sum('stock');
         return $productsBought;
     }
 }

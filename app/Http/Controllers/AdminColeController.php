@@ -223,6 +223,7 @@ class AdminColeController extends Controller
             $collegeUser = new CollegeUser;
             $collegeUser->college_id = $collegeId;
             $collegeUser->user_id = $userId;
+            $collegeUser->remember_token = Str::random(10);
             $collegeUser->save();
             User::where('id',  $userId)->update(['status' => 2]);
 

@@ -61,3 +61,12 @@
     z-index: 10;
 }
 
+.purchase-row01,
+.purchase-row02 {
+  display: none;
+}
+
+.purchase-row01.show,
+.purchase-row02.show {
+  display: table-row;
+}

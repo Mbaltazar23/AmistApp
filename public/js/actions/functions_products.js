@@ -334,7 +334,7 @@ function openModal() {
     document.querySelector("#btnText").innerHTML = "Guardar";
     document.querySelector("#titleModal").innerHTML = "Nuevo Producto";
     document.querySelector("#formProductos").reset();
-    document.querySelector("#img").src = defaultImage;
+    document.querySelector("#img").src = "images/products/product.png";
     $("#modalFormProductos").modal("show");
 }
 

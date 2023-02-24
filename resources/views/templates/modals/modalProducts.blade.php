@@ -41,7 +41,7 @@
                                 <span class="delPhoto notBlock">X</span>
                                 <label for="image"></label>
                                 <div>
-                                    <img id="img" />
+                                    <img id="img" src="images/products/product.png" />
                                 </div>
                             </div>
                             <div class="upimg">
@@ -80,7 +80,7 @@
                             <td id="celNombre"></td>
                         </tr>
                         <tr>
-                            <td><strong>Precio:</strong></td>
+                            <td><strong>Puntos:</strong></td>
                             <td id="celPrecio"></td>
                         </tr>
                         <tr>
@@ -98,6 +98,14 @@
                         <tr>
                             <td><strong>Hora:</strong></td>
                             <td id="celHora"></td>
+                        </tr>
+                        <tr class="purchase-row01">
+                            <td><strong>Stock Vendido</strong></td>
+                            <td id="celStockV"></td>
+                        </tr>
+                        <tr class="purchase-row02">
+                            <td><strong>Puntos obtenidos</strong></td>
+                            <td id="celPuntos"></td>
                         </tr>
                         <tr>
                             <td><strong>Status:</strong></td>

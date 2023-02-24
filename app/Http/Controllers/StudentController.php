@@ -120,7 +120,6 @@ class StudentController extends Controller
                 $student = new Student();
                 $student->user_id = $user->id;
                 $student->course_id = $course;
-                $student->remember_token = Str::random(10);
                 $user->students()->save($student);
 
                 // Asignar el colegio al usuario

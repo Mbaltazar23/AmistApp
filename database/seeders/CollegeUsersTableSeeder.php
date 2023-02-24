@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -15,16 +14,29 @@ class CollegeUsersTableSeeder extends Seeder
      * @return void
      */
     public function run()
-    {    
+    {
+                
         DB::table('college_users')->insert([
-           [
-                'college_id' => 1,
-                'created_at' => '2023-02-17 15:52:39',
+            [
                 'id' => 2,
-                'remember_token' =>  Str::random(10),
-                'updated_at' => '2023-02-17 15:52:39',
+                'college_id' => 1,
                 'user_id' => 3,
-           ],
+                'remember_token' => 'CmpDrxuHKY',
+            ],
+            [
+                'id' => 3,
+                'college_id' => 1,
+                'user_id' => 4,
+                'remember_token' => NULL,
+            ],
+            [
+                'id' => 4,
+                'college_id' => 1,
+                'user_id' => 5,
+                'remember_token' => NULL,
+            ],
         ]);
+        
+        
     }
 }

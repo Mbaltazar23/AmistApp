@@ -13,6 +13,8 @@ class Purchase extends Model
         'id',
         'user_id',
         'product_id',
+        'points',
+        'stock',
     ];
 
     public function product()

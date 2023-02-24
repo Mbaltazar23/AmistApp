@@ -119,5 +119,11 @@ Route::middleware('auth')->group(function () {
 
     /* Modulo Catalogo */
     Route::get('/productos-cat', [PurchaseController::class, 'purchases']);
+    Route::get('/catalogo', [PurchaseController::class, 'purchasesCat']);
+    Route::get('/productos-adquiridos', [PurchaseController::class, 'purchasesAlum']);
     Route::get('/purchases', [PurchaseController::class, 'getPurchasesProducts']);
+    Route::get('/purchases/alum', [PurchaseController::class, 'getProductsPurchasesAlum']);
+    Route::get('/purchases/cat', [PurchaseController::class, 'getCatalogActive']);
+    Route::get('/purchases/getPurchase/{id}', [PurchaseController::class, 'getPurchaseProduct']);
+    Route::post('/purchases/setPurchase/{id}', [PurchaseController::class, 'setPurchase']);
 });
