@@ -35,8 +35,6 @@
 <script>
     $.widget.bridge('uibutton', $.ui.button)
 </script>
-<!-- Bootstrap 4 -->
-<script src="{{ asset('js/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <!-- ChartJS -->
 <script src="{{ asset('js/plugins/chart.js/Chart.min.js') }}"></script>
 <!-- Sparkline -->

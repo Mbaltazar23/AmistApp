@@ -50,7 +50,8 @@ document.addEventListener(
             e.preventDefault();
             let strNombre = document.querySelector("#txtNombre").value;
             let strPuntos = document.querySelector("#txtPuntaje").value;
-            if (strNombre == "" || strPuntos == "") {
+            let strTipo = document.querySelector("#txtVisible").value;
+            if (strNombre == "" || strPuntos == "" || strTipo == "") {
                 swal(
                     "Atención",
                     "Debe ingresar un nombre y su puntaje..",
@@ -105,6 +106,8 @@ function fntViewInfo(nro, idaccion) {
                     response.data.data.fecha;
                 document.querySelector("#celHora").innerHTML =
                     response.data.data.hora;
+                document.querySelector("#celTipo").innerHTML =
+                    "Para " + response.data.data.tipo;
                 $("#modalViewAccion").modal("show");
             } else {
                 swal("Error", objData.msg, "error");
@@ -132,6 +135,8 @@ function fntEditInfo(element, idaccion) {
                 document.querySelector("#txtNombre").value = String(
                     response.data.data.nombre
                 ).toLowerCase();
+                document.querySelector("#txtVisible").value =
+                    response.data.data.tipo;
                 document.querySelector("#txtPuntaje").value =
                     response.data.data.puntos;
 
@@ -227,6 +232,7 @@ function generarReporte() {
             var columns = [
                 "NRO",
                 "NOMBRE",
+                "VISIBLE",
                 "PUNTOS",
                 "FECHA",
                 "HORA",
@@ -243,6 +249,7 @@ function generarReporte() {
                 data[i] = [
                     i + 1,
                     acciones[i].nombre,
+                    acciones[i].tipo,
                     acciones[i].puntos,
                     acciones[i].fecha,
                     acciones[i].hora,

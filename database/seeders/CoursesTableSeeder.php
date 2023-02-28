@@ -15,14 +15,14 @@ class CoursesTableSeeder extends Seeder
      */
     public function run()
     {
-        
+
         DB::table('courses')->insert([
             [
                 'id' => 1,
                 'name' => '4to Medio',
                 'section' => 'C',
                 'college_id' => 1,
-                'address' => NULL,
+                'address' => null,
                 'created_at' => '2023-02-20 19:25:45',
                 'updated_at' => '2023-02-20 19:34:25',
                 'status' => 1,
@@ -33,12 +33,24 @@ class CoursesTableSeeder extends Seeder
                 'name' => '3 Medip',
                 'section' => 'B',
                 'college_id' => 1,
-                'address' => NULL,
+                'address' => null,
                 'created_at' => '2023-02-20 19:34:35',
                 'updated_at' => '2023-02-20 19:34:35',
                 'status' => 1,
                 'remember_token' => 'KLoBFiHW9x',
             ],
-        ]);    
+            [
+                'id' => 3,
+                'name' => '4 Medio',
+                'section' => 'C',
+                'college_id' => 2,
+                'address' => null,
+                'created_at' => '2023-02-23 20:39:29',
+                'updated_at' => '2023-02-23 20:39:29',
+                'status' => 1,
+                'remember_token' => 'adUzgkvnwJ',
+            ],
+        ]);
+
     }
 }

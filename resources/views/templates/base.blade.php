@@ -39,7 +39,7 @@
 
 </head>
 
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini layout-fixed">
 
     @include('templates.partials.nav')
     @yield('content')

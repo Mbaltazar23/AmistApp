@@ -172,7 +172,7 @@ class DashboardController extends Controller
                     "Educacion" => array(
                         "icon" => "fas fa-regular fa-school",
                         "submodulos" => array(
-                            "Compañeros" => array("pagina" => "alumnos"),
+                            "Compañeros" => array("pagina" => "compañeros"),
                         ),
                     ),
                     "Catalogo" => array(
@@ -184,7 +184,20 @@ class DashboardController extends Controller
                     ),
                 );
             } else if ($role->role == env("ROLPROFE")) {
-
+                $navAdmin = array(
+                    "Educacion" => array(
+                        "icon" => "fas fa-regular fa-school",
+                        "submodulos" => array(
+                            "Alumnos" => array("pagina" => "alumnos-curso"),
+                        ),
+                    ),
+                    "Catalogo" => array(
+                        "icon" => "fas fa-solid fa-store",
+                        "submodulos" => array(
+                            "Productos" => array("pagina" => "catalogo"),
+                        ),
+                    ),
+                );
             }
         }
         return $navAdmin;
@@ -208,8 +221,8 @@ class DashboardController extends Controller
                     "top_actions" => array(
                         "title" => "Acciones más usadas por alumnos",
                         "icon" => "fas fa-award",
-                        "color" => "bg-warning",
-                        "value" => $percentageActions,
+                        "color" => "bg-olive",
+                        "value" => $percentageActions . "%",
                         "url" => "acciones",
                     ),
                     "student_points_percentage" => array(
@@ -275,7 +288,8 @@ class DashboardController extends Controller
                 );
             } else if ($role->role == env("ROLALU")) {
                 $idUser = Auth::user()->id;
-                $pointsAvailable = $this->pointsAvailableAlum($idUser);
+                $pointsAvailable = $this->pointsAvailable($idUser);
+                $countsStudents = $this->countAlumnsUser($idUser);
                 $porcentageProductsPurchases = $this->porcentageNotificationsForAlum($idUser);
                 $productosPurchases = $this->countProductsPurchasesAlum($idUser);
 
@@ -285,6 +299,13 @@ class DashboardController extends Controller
                         "icon" => "fas fa fa-star-half-alt",
                         "color" => "bg-dark",
                         "value" => $pointsAvailable,
+                        "url" => "compañeros",
+                    ),
+                    "companions of student" => array(
+                        "title" => "Cantidad de compañeros",
+                        "icon" => "fas fa fa-users",
+                        "color" => "bg-warning",
+                        "value" => $countsStudents,
                         "url" => "compañeros",
                     ),
                     "porcentage notifications for student" => array(
@@ -301,6 +322,42 @@ class DashboardController extends Controller
                         "value" => $productosPurchases,
                         "url" => "productos-adquiridos",
                     ));
+            } else if ($role->role == env("ROLPROFE")) {
+                $idUser = Auth::user()->id;
+                $pointsAvailable = $this->pointsAvailable($idUser);
+                $alumnsForTeacher = $this->countsAlumnsForTeacher($idUser);
+                $porcentajePointsAlumnsForTeacher = $this->porcentageActionsForAlumns($idUser);
+                $porcentajePoinstForTeacherAllAlumn = $this->porcentageActionsForTeacherAllAlumns($idUser);
+
+                $cardsPanel = array(
+                    "points Teacher" => array(
+                        "title" => "Puntos disponibles",
+                        "icon" => "fas fa fa-star-half-alt",
+                        "color" => "bg-dark",
+                        "value" => $pointsAvailable,
+                        "url" => "alumnos-curso",
+                    ),
+                    "count alumns for student" => array(
+                        "title" => "Cantidad de Alumnos a su cargo",
+                        "icon" => "fas fa fa-users",
+                        "color" => "bg-success",
+                        "value" => $alumnsForTeacher,
+                        "url" => "alumnos-curso",
+                    ),
+                    "porcentaje alumns actions for teacher" => array(
+                        "title" => "% de Acciones entre sus Alumnos",
+                        "icon" => "fas fa fa-check-circle",
+                        "color" => "bg-blue",
+                        "value" => $porcentajePointsAlumnsForTeacher . "%",
+                        "url" => "alumnos-curso",
+                    ),
+                    "porcentaje alumns points for teacher" => array(
+                        "title" => "% de Puntaje dado a sus Alumnos",
+                        "icon" => "fas fa fa-star-half-alt",
+                        "color" => "bg-warning",
+                        "value" => $porcentajePoinstForTeacherAllAlumn . "%",
+                        "url" => "alumnos-curso",
+                    ));
             }
         }
         return $cardsPanel;
@@ -313,11 +370,12 @@ class DashboardController extends Controller
         $totalActions = Action::count();
 
         $topAction = Action::withCount('pointsUserActions')
+            ->where('type', env("ROLALU"))
             ->orderBy('points_user_actions_count', 'desc')
             ->first();
 
         if ($topAction) {
-            $percentageActions = ($topAction->points_user_actions_count / $totalActions) * 100;
+            $percentageActions = round(($topAction->points_user_actions_count / $totalActions) * 100, 2);
         } else {
             $percentageActions = 0;
         }
@@ -328,9 +386,15 @@ class DashboardController extends Controller
     {
         $student_points_percentage = 0;
 
-        $total_points = PointAlumnAction::sum('points');
+        $total_points = PointAlumnAction::whereHas('action', function ($query) {
+            $query->where('type', '=', env("ROLALU"));
+        })->sum('points')
+            ->value();
 
         $student_points = PointAlumnAction::where('user_send_id', '<>', 'user_recept_id')
+            ->whereHas('action', function ($query) {
+                $query->where('type', '=', env("ROLALU"));
+            })
             ->sum('points');
 
         if ($total_points > 0) {
@@ -382,7 +446,8 @@ class DashboardController extends Controller
         $coursesCount = Course::where('college_id', $collegeId)->count();
 
         if ($coursesCount > 0) {
-            $percentage = ($studentsCount / ($coursesCount * 30)) * 100; // Se asume que un curso tiene una duración de 30 días
+            $studentsPerCourse = $studentsCount / $coursesCount;
+            $percentage = ($studentsPerCourse / $studentsCount) * 100;
         }
 
         return round($percentage, 2);
@@ -404,14 +469,16 @@ class DashboardController extends Controller
     public function porcentageProductsPurchases($collegeId)
     {
         $percentage = 0;
-        $totalStock = Purchase::sum('stock'); // Stock total de todos los purchases
+        $totalStock = Purchase::sum('stock');
 
         $collegeStock = Purchase::whereHas('user.students.course.college', function ($q) use ($collegeId) {
             $q->where('id', $collegeId);
-        })->sum('stock'); // Stock total de los purchases pertenecientes al colegio
-        
-        $percentage = ($collegeStock / $totalStock) * 100; // Porcentaje de los productos vendidos al colegio
-        
+        })->sum('stock');
+
+        if ($totalStock > 0) {
+            $percentage = round(($collegeStock / $totalStock) * 100, 2);
+        }
+
         return $percentage;
     }
 
@@ -422,11 +489,16 @@ class DashboardController extends Controller
 
         $totalActions = PointAlumnAction::count();
 
-        $userActions = PointAlumnAction::whereHas('userSend.colleges', function ($query) use ($collegeId) {
-            $query->where('college_id', $collegeId);
-        })
-            ->orWhereHas('userRecept.colleges', function ($query) use ($collegeId) {
+        $userActions = PointAlumnAction::where(function ($query) use ($collegeId) {
+            $query->whereHas('userSend.colleges', function ($query) use ($collegeId) {
                 $query->where('college_id', $collegeId);
+            })
+                ->orWhereHas('userRecept.colleges', function ($query) use ($collegeId) {
+                    $query->where('college_id', $collegeId);
+                });
+        })
+            ->whereHas('action', function ($query) {
+                $query->where('type', '=', env("ROLALU"));
             })
             ->count();
 
@@ -435,15 +507,33 @@ class DashboardController extends Controller
         } else {
             $percentActions = 0;
         }
-        return $percentActions;
+        return round($percentActions, 2);
     }
 
     //Cards Panel of Dashboard  : Alumn
-    public function pointsAvailableAlum($idAlum)
+    public function pointsAvailable($idAlum)
     {
         $user = User::find($idAlum);
         $pointsAvailable = $user->points;
         return $pointsAvailable;
+    }
+
+    public function countAlumnsUser($idAlum)
+    {
+        $user = User::with('colleges')->find($idAlum);
+        $collegeId = $user->colleges->first()->college_id;
+        $course = Course::where('college_id', $collegeId)
+            ->whereHas('students', function ($query) use ($idAlum) {
+                $query->where('user_id', $idAlum);
+            })
+            ->first();
+        $numberOfStudents = Student::where('course_id', $course->id)
+            ->where('user_id', '<>', $idAlum)
+            ->whereHas('user', function ($query) {
+                $query->where('status', '<>', 0);
+            })
+            ->count();
+        return $numberOfStudents;
     }
 
     public function porcentageNotificationsForAlum($idAlum)
@@ -465,4 +555,64 @@ class DashboardController extends Controller
         $productsBought = $user->purchases->sum('stock');
         return $productsBought;
     }
+
+    /*Cards Panel of Dashboard  : Profe */
+
+    public function countsAlumnsForTeacher($idTeacher)
+    {
+        $alumnos = Student::whereHas('course.teachers', function ($query) use ($idTeacher) {
+            $query->where('user_id', $idTeacher);
+        })->count();
+        return $alumnos;
+    }
+
+    public function porcentageActionsForAlumns($idTeacher)
+    {
+        $porcentaje = 0;
+        $courseIds = Course::whereHas('teachers', function ($query) use ($idTeacher) {
+            $query->where('user_id', $idTeacher);
+        })->pluck('id');
+
+        $numCourses = $courseIds->count();
+
+        $total_points_teacher = PointAlumnAction::where('user_send_id', $idTeacher)
+            ->whereHas('action', function ($query) {
+                $query->where('type', '=', env('ROLALU'));
+            })
+            ->whereHas('userRecept.teachers.course', function ($query) use ($idTeacher, $courseIds) {
+                $query->where('teachers.user_id', $idTeacher)
+                    ->whereIn('courses.id', $courseIds);
+            })
+            ->sum('points');
+
+        $porcentaje = ($total_points_teacher / $numCourses) * 100;
+
+        return round($porcentaje, 2);
+    }
+
+    public function porcentageActionsForTeacherAllAlumns($idTeacher)
+    {
+        $porcentaje = 0;
+        $teacher = Teacher::where('user_id', $idTeacher)->first();
+        $courses = $teacher->courses;
+        if ($courses) {
+            $courseIds = $courses->pluck('id')->toArray();
+            $total_points = PointAlumnAction::whereHas('userRecept', function ($query) use ($courseIds) {
+                $query->whereIn('course_id', $courseIds);
+            })->sum('points');
+
+            $total_points_teacher = PointAlumnAction::where('user_send_id', $teacher->user_id)
+                ->whereHas('userRecept.course.teachers', function ($query) use ($idTeacher) {
+                    $query->where('user_id', $idTeacher);
+                })
+                ->whereHas('action', function ($query) {
+                    $query->where('type', '=', env('ROLALU'));
+                })
+                ->sum('points');
+
+            $porcentaje = $total_points_teacher / $total_points * 100;
+        }
+        return round($porcentaje, 2);
+    }
+
 }

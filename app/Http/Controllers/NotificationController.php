@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Answer;
 use App\Models\Question;
-use Illuminate\Support\Str;
+use App\Models\UserNotification;
 use App\Models\Notification;
 use Illuminate\Http\Request;
-use App\Models\UserNotification;
+use Illuminate\Support\Str;
+
 
 class NotificationController extends Controller
 {

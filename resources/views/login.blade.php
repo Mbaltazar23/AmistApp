@@ -19,7 +19,7 @@
                 </div>
                 <div class="input-group mb-3">
                     <input type="password" id="txtPassword" name="txtPassword"class="form-control"
-                        placeholder="Password..">
+                        placeholder="Password.." maxlength="12">
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-lock"></span>
@@ -28,12 +28,7 @@
                 </div>
                 <div class="row">
                     <div class="col-8">
-                        <div class="icheck-primary">
-                            <input type="checkbox" id="remember">
-                            <label for="remember">
-                                Recuérdame
-                            </label>
-                        </div>
+                       
                     </div>
                     <div class="col-4">
                         <button type="submit" id="btnLogin" class="btn btn-primary btn-block">Ingresar</button>

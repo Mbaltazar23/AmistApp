@@ -44,19 +44,25 @@ class PurchaseController extends Controller
     /* funciones que cargaran los productos asociados a las compras */
     public function getPurchasesProducts()
     {
+        $collegeId = Auth::user()->colleges->first()->college_id;
+
         $products = Product::has('purchases')
-            ->with('category')
-            ->whereHas('purchases', function ($query) {
-                $query->havingRaw('SUM(stock) > 0');
+            ->whereHas('purchases.user.students.course.college', function ($query) use ($collegeId) {
+                $query->where('id', '=', $collegeId);
             })
-            ->selectRaw('*, points * stock as points_initial')
+            ->with(['category', 'purchases.user.students.course.college'])
             ->get();
 
         $data = [];
-
         foreach ($products as $product) {
-            $totalPurchases = $product->purchases->sum('stock');
-            $totalPoints = $product->purchases->sum('points');
+            $purchases = $product->purchases()->whereHas('user.students.course.college', function ($query) use ($collegeId) {
+                $query->where('id', '=', $collegeId);
+            })->get();
+
+            $uniquePurchases = $purchases->unique('user_id');
+
+            $totalPurchases = $uniquePurchases->sum('stock');
+            $totalPoints = $uniquePurchases->sum('points');
             $btnView = '';
             $row = [
                 'categoria' => $product->category->name,
@@ -122,61 +128,86 @@ class PurchaseController extends Controller
     {
         $userId = Auth::user()->id;
 
+        $collegeId = Auth::user()->colleges->first()->college_id;
+
         $products = Product::has('purchases')
-            ->whereHas('purchases', function ($query) use ($userId) {
-                $query->where('user_id', $userId)->havingRaw('SUM(stock) > 0');
+            ->whereHas('purchases.user.students.course.college', function ($query) use ($collegeId) {
+                $query->where('id', '=', $collegeId);
             })
-            ->with('category')
+            ->with(['category', 'purchases.user.students.course.college'])
             ->get();
 
         $data = [];
-
         foreach ($products as $product) {
-            $totalPurchases = $product->purchases->sum('stock');
-            $totalPoints = $product->purchases->sum('points');
-            $btnView = '';
-            $row = [
-                'categoria' => $product->category->name,
-                'stock' => $totalPurchases,
-                'puntos' => $totalPoints,
-            ];
+            $purchases = $product->purchases()->whereHas('user.students.course.college', function ($query) use ($collegeId) {
+                $query->where('id', '=', $collegeId);
+            })->get();
 
-            $btnView = '<button class="btn btn-danger btn-sm" onClick="fntDelCanj(' . $product->id . ')" title="Canjear Producto"><i class="far fa-trash-alt"></i></button>';
+            $uniquePurchases = $purchases->unique('user_id');
 
-            $row['nameP'] = "<img src='" . asset('images/products/' . $product->image) . "' alt='" . $product->name . "' class='img-circle img-size-32 mr-2'>" . $product->name;
+            foreach ($uniquePurchases as $purchase) {
+                if ($purchase->user_id === $userId) {
+                    $totalPurchases = $purchases->where('user_id', $purchase->user_id)->sum('stock');
+                    $totalPoints = 0;
 
-            $row['options'] = '<div class="text-center">' . $btnView . '</div>';
-            $data[] = $row;
-            // ...
+                    // Suma los puntos por usuario
+                    $userPurchases = $purchases->where('user_id', $purchase->user_id);
+                    foreach ($userPurchases as $userPurchase) {
+                        $totalPoints += $userPurchase->points;
+                    }
+
+                    $btnView = '<button class="btn btn-danger btn-sm" onClick="fntDelCanj(' . $product->id . ')" title="Canjear Producto"><i class="far fa-trash-alt"></i></button>';
+
+                    $row = [
+                        'categoria' => $product->category->name,
+                        'puntos' => $product->points,
+                        'stock' => $totalPurchases,
+                        'total_puntos' => $totalPoints,
+                        'nameP' => "<img src='" . asset('images/products/' . $product->image) . "' alt='" . $product->name . "' class='img-circle img-size-32 mr-2'>" . $product->name,
+                        'options' => '<div class="text-center">' . $btnView . '</div>',
+                    ];
+
+                    $data[] = $row;
+                }
+            }
         }
-
         return response()->json([
             'status' => true,
             'data' => $data,
         ]);
+
     }
 
     /*Termino de funciones que cargen los productos */
     public function getPurchaseProduct($id)
     {
-        $product = Product::with('category')
-            ->where('id', $id)
-            ->whereHas('purchases', function ($query) {
-                $query->havingRaw('SUM(stock) > 0');
-            })->first();
+
+        $collegeId = Auth::user()->colleges->first()->college_id;
+
+        $product = Product::has('purchases')
+            ->where('id', '=', $id)
+            ->whereHas('purchases.user.students.course.college', function ($query) use ($collegeId) {
+                $query->where('id', '=', $collegeId);
+            })
+            ->with(['category', 'purchases.user.students.course.college'])
+            ->first();
 
         if ($product) {
+            $purchase = $product->purchases()->whereHas('user.students.course.college', function ($query) use ($collegeId) {
+                $query->where('id', '=', $collegeId);
+            })->first();
+
             $data = [
                 'id' => $product->id,
                 'nombre' => $product->name,
                 'categoria' => $product->category->name,
                 'puntos' => $product->points,
                 'stock' => $product->stock,
-                'fecha' => $product->created_at->format('d-m-Y'),
-                'hora' => $product->created_at->format('H:i:s'),
+                'fecha' => $purchase->created_at->format('d-m-Y'),
+                'hora' => $purchase->created_at->format('H:i:s'),
                 'status' => $product->status,
-                'points_initial' => $product->purchases->first()->points,
-                'stock_ven' => $product->purchases->first()->stock,
+                'points_initial' => $purchase->points,
+                'stock_ven' => $purchase->stock,
             ];
 
             if ($product->image && file_exists(public_path('images/products/' . $product->image))) {
@@ -198,6 +229,7 @@ class PurchaseController extends Controller
                 'msg' => 'No se pudo obtenerCanjear Producto',
             ]);
         }
+
     }
 
     public function setPurchase($id)

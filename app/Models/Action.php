@@ -8,15 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Action extends Model
 {
     use HasFactory;
-  
+
     protected $fillable = [
         'name',
+        'type',
         'points',
         'status',
         'created_at',
     ];
 
-    public function pointsUserActions(){
+    public function pointsUserActions()
+    {
         return $this->hasMany(PointAlumnAction::class);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -15,21 +14,32 @@ class CollegesTableSeeder extends Seeder
      * @return void
      */
     public function run()
-    {
-
+    {        
         DB::table('colleges')->insert([
             [
-                'address' => '',
-                'created_at' => '2023-02-16 05:20:38',
-                'dni' => '9.656.456-5',
                 'id' => 1,
                 'name' => 'San Marcos',
+                'dni' => '9.656.456-5',
+                'address' => '',
                 'phone' => '+56945436346',
-                'remember_token' =>  Str::random(10),
                 'status' => 1,
+                'created_at' => '2023-02-16 05:20:38',
                 'updated_at' => '2023-02-16 05:20:38',
+                'remember_token' => 'KUbRjjkBC7',
+            ],
+            [
+                'id' => 2,
+                'name' => 'Santa Monica',
+                'dni' => '3.553.454-5',
+                'address' => '',
+                'phone' => '+56946346346',
+                'status' => 1,
+                'created_at' => '2023-02-23 20:33:41',
+                'updated_at' => '2023-02-23 20:33:41',
+                'remember_token' => 'jdkzlfc5ea',
             ],
         ]);
-
+        
+        
     }
 }

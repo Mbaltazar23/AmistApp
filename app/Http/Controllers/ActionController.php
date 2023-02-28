@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Action;
-use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
 use App\Models\PointAlumnAction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ActionController extends Controller
 {
@@ -63,6 +64,7 @@ class ActionController extends Controller
     {
         $id = $request->input('idAccion');
         $name = ucwords($request->input('txtNombre'));
+        $type = $request->input('txtVisible');
         $points = $request->input('txtPuntaje');
         $remember_token = Str::random(10);
 
@@ -71,11 +73,14 @@ class ActionController extends Controller
             $action = Action::find($id);
             $action->name = $name;
             $action->points = $points;
+            $action->type = $type;
             $action->save();
             return response()->json(['status' => true, 'msg' => 'Accion actualizada Exitosamente !!', 'data' => $action]);
         } else {
 
-            $count = Action::where('name', $name)->count();
+            $count = Action::where('name', $name)
+                ->where('type', $type)
+                ->count();
 
             if ($count > 0) {
                 return response()->json(['status' => false, 'msg' => 'Esta Accion ya existe']);
@@ -83,6 +88,7 @@ class ActionController extends Controller
                 // insertar categoría
                 $action = new Action();
                 $action->name = $name;
+                $action->type = $type;
                 $action->points = $points;
                 $action->remember_token = $remember_token;
                 $action->save();
@@ -102,6 +108,7 @@ class ActionController extends Controller
                     'id' => $action->id,
                     'nombre' => $action->name,
                     'puntos' => $action->points,
+                    'tipo' => $action->type,
                     'fecha' => $action->created_at->format('d-m-Y'),
                     'hora' => $action->created_at->format('H:i:s'),
                     'status' => $action->status,
@@ -151,6 +158,7 @@ class ActionController extends Controller
                 'id' => $action->id,
                 'nombre' => $action->name,
                 'puntos' => $action->points,
+                'tipo' => "Para " . $actions->type,
                 'fecha' => Carbon::parse($action->created_at)->format('d-m-Y'),
                 'hora' => Carbon::parse($action->created_at)->format('H:i:s'),
                 'status' => $action->status,
@@ -164,11 +172,14 @@ class ActionController extends Controller
 
     public function getSelectActions()
     {
-        $actions = Action::where('status', '!=', 0)->get();
+        $role = Auth::user()->roles->first()->role;
+
+        $actions = Action::where('status', '!=', 0)->where('type', $role)
+            ->get();
 
         $html = '<option value="0">Seleccione una Accion</option>';
         foreach ($actions as $action) {
-            $html .= '<option value="' . $action->id . '">' . $action->name . '</option>';
+            $html .= '<option value="' . $action->id . '" data-points="' . $action->points . '">' . $action->name . '</option>';
         }
 
         return $html;

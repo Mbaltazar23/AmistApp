@@ -42,7 +42,7 @@ class AuthController extends Controller
                     if ($role->role == env("ROLADMINCOLE")) {
                         $imgPerfil = 'avatarAdminCole.png';
                     } else if ($role->role == env("ROLPROFE")) {
-                        $imgPerfil = 'avatar5.png';
+                        $imgPerfil = 'avatar4.png';
                     } else {
                         $imgPerfil = 'avatarAlum.jpg';
                     }

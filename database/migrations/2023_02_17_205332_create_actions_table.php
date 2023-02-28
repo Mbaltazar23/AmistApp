@@ -17,6 +17,7 @@ class CreateActionsTable extends Migration
         Schema::create('actions', function (Blueprint $table) {
             $table->id();
             $table->string('name', 150);
+            $table->enum('type',["Alumno", "Profesor"]);
             $table->integer('points')->nullable();
             $table->integer('status')->default(1);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));

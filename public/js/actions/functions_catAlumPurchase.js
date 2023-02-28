@@ -18,7 +18,7 @@ window.addEventListener(
                 { data: "nameP" },
                 { data: "categoria" },
                 { data: "stock" },
-                { data: "puntos" },
+                { data: "total_puntos" },
                 {
                     data: "options",
                     render: function (data) {

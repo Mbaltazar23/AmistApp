@@ -8,6 +8,7 @@ use App\Http\Controllers\CollegeController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PointAlumnActionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\StudentController;
@@ -126,4 +127,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/purchases/cat', [PurchaseController::class, 'getCatalogActive']);
     Route::get('/purchases/getPurchase/{id}', [PurchaseController::class, 'getPurchaseProduct']);
     Route::post('/purchases/setPurchase/{id}', [PurchaseController::class, 'setPurchase']);
+
+    /* Modulo Puntos - Alumno/Profesor*/
+    Route::get('/compañeros', [PointAlumnActionController::class, 'indexActionAlumns']);
+    Route::get('/alumnos-curso', [PointAlumnActionController::class, 'indexActionsTeacher']);
+    Route::get('/companios', [PointAlumnActionController::class, 'getCompaniosAlum']);
+    Route::get('/alumns-teacher', [PointAlumnActionController::class, 'getAlumnsTeacher']);
+    Route::get('/companios/alum/{id}', [PointAlumnActionController::class, 'getStudentAlum']);
+    Route::post('/companios/donate', [PointAlumnActionController::class, 'setPointsDonate']);
 });

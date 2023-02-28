@@ -15,7 +15,7 @@ class TeachersTableSeeder extends Seeder
      */
     public function run()
     {
-        
+
         DB::table('teachers')->insert([
             [
                 'id' => 1,
@@ -24,7 +24,14 @@ class TeachersTableSeeder extends Seeder
                 'created_at' => '2023-02-21 20:36:16',
                 'updated_at' => '2023-02-21 20:36:16',
             ],
+            [
+                'id' => 2,
+                'course_id' => 3,
+                'user_id' => 6,
+                'created_at' => '2023-02-23 20:40:45',
+                'updated_at' => '2023-02-23 20:40:45',
+            ],
         ]);
-           
+
     }
 }
