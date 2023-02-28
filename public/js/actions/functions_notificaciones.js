@@ -270,7 +270,10 @@ document.addEventListener(
                 e.preventDefault();
                 let idNot = document.querySelector("#idNotificacionT").value;
                 let tipoNotificacion =
-                    document.querySelector("#tipoNotificacion").value;
+                    document.querySelector("#tipoNotificacion").value ==
+                    "Pregunta"
+                        ? "Question"
+                        : "";
                 let titleNotificacion = document.querySelector("#title").value;
                 let question = document.querySelector("#txtQuestion").value;
                 let points = document.querySelector("#points").value;
@@ -294,7 +297,6 @@ document.addEventListener(
                             if (response.data.status) {
                                 tableNotificaciones.api().ajax.reload();
                                 $("#modalFormNotificacionTitle").modal("hide");
-                                cerrarModal();
                                 swal("Exito !!", response.data.msg, "success");
                             } else {
                                 swal("Error", response.data.msg, "error");
@@ -539,7 +541,6 @@ function viewFormTitleNotificacion(arrNotificacion) {
         "Actualizar Titulo de la Notificacion";
     document.querySelector("#idNotificacionT").value = arrNotificacion.id;
     document.querySelector("#tipoNotificacion").value = arrNotificacion.type;
-    document.querySelector("#txtQuestion").value = arrNotificacion.pregunta;
     document.querySelector("#title").value = arrNotificacion.mensaje
         .toString()
         .toLowerCase();
