@@ -388,8 +388,7 @@ class DashboardController extends Controller
 
         $total_points = PointAlumnAction::whereHas('action', function ($query) {
             $query->where('type', '=', env("ROLALU"));
-        })->sum('points')
-            ->value();
+        })->sum('points');
 
         $student_points = PointAlumnAction::where('user_send_id', '<>', 'user_recept_id')
             ->whereHas('action', function ($query) {
@@ -486,9 +485,9 @@ class DashboardController extends Controller
     {
         $percentActions = 0;
         $collegeId = Auth::user()->colleges->first()->college_id;
-
-        $totalActions = PointAlumnAction::count();
-
+        
+        $totalActions = PointAlumnAction::sum('points');
+        
         $userActions = PointAlumnAction::where(function ($query) use ($collegeId) {
             $query->whereHas('userSend.colleges', function ($query) use ($collegeId) {
                 $query->where('college_id', $collegeId);
@@ -500,8 +499,8 @@ class DashboardController extends Controller
             ->whereHas('action', function ($query) {
                 $query->where('type', '=', env("ROLALU"));
             })
-            ->count();
-
+            ->sum('points');
+        
         if ($totalActions > 0) {
             $percentActions = ($userActions / $totalActions) * 100;
         } else {

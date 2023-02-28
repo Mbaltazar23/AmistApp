@@ -45,9 +45,9 @@ document.addEventListener(
         if (document.querySelector("#formPoints")) {
             let formPoints = document.querySelector("#formPoints");
             formPoints.onsubmit = function (e) {
-                e.preventDefaul();
+                e.preventDefault();
                 let listActions = document.querySelector("#listActions").value;
-                let points = document.querySelector("#points").value;
+                let points = document.querySelector("#pointsInput").value;
                 if (listActions == "") {
                     swal(
                         "Atención !!",
@@ -63,10 +63,12 @@ document.addEventListener(
                         buttons: true,
                     }).then((isClosed) => {
                         if (isClosed) {
+                            let formData = new FormData(formPoints);
                             axios
-                                .post(`/companios/donate`)
+                                .post(`/companios/donate`, formData)
                                 .then((response) => {
                                     if (response.data.status) {
+                                        $("#modalFormPoints").modal('hide');
                                         swal(
                                             "Exito !!",
                                             response.data.msg,
