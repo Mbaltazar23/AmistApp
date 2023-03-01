@@ -564,36 +564,48 @@ class DashboardController extends Controller
     public function porcentageActionsForAlumns($idTeacher, $collegeId)
     {
         $actionsPercentage = 0;
-        // Porcentaje de acciones del usuario en relación al college
-        $actionsCount = PointAlumnAction::where('user_recept_id', $idTeacher)
-            ->whereHas('userSend.colleges', function ($query) use ($collegeId) {
-                $query->where('college_id', $collegeId);
-            })->orWhereHas('userRecept.colleges', function ($query) use ($collegeId) {
-                $query->where('college_id', $collegeId);
-            })->sum('points');
+        // Obtenemos el total de puntos enviados por el usuario a sus alumnos en el curso del college
+        $total_points_sent = PointAlumnAction::where('user_send_id', $idTeacher)
+            ->whereHas('userSend.teachers.course.college', function ($query) use ($collegeId) {
+                $query->where('id', $collegeId);
+            })
+            ->sum('points');
 
-        $totalActionsCount = PointAlumnAction::where('user_recept_id', $idTeacher)->sum('points');
+        // Obtenemos el total de puntos de todas las acciones del usuario
+        $total_points_all_users = PointAlumnAction::sum('points');
 
-        $actionsPercentage = ($totalActionsCount > 0) ? ($actionsCount / $totalActionsCount) * 100 : 0;
+        // Calculamos el porcentaje de puntaje dado a los alumnos
+        if ($total_points_all_users != 0) {
+            $actionsPercentage = -1 * (($total_points_sent - $total_points_all_users / $total_points_all_users * 100));
+        }
 
         return round($actionsPercentage, 2);
     }
 
     public function porcentageActionsForTeacherAllAlumns($idTeacher, $collegeId)
     {
-        $pointsPercentage = 0;
+        // Obtenemos el total de puntos enviados por todos los usuarios a los alumnos del curso del college
+        $total_points_all_users = PointAlumnAction::sum('points');
 
-        
-        $userTotalPoints = PointAlumnAction::whereHas('userRecept.students.course.college', function ($query) use ($collegeId) {
-            $query->where('id', $collegeId);
-        })->count();
-    
-        $userCoursePoints = PointAlumnAction::whereHas('userSend.teachers.course.college', function ($query) use ($collegeId) {
-            $query->where('id', $collegeId);
-        })->where('user_send_id', $idTeacher)->count();
+        // Obtenemos el total de puntos enviados por el usuario a los alumnos del curso del college
+        $total_points_sent = PointAlumnAction::where('user_send_id', $idTeacher)
+            ->whereHas('userSend.teachers.course.college', function ($query) use ($collegeId) {
+                $query->where('id', $collegeId);
+            })
+            ->sum('points');
 
-    
-        $pointsPercentage = ($userTotalPoints > 0) ? ($userCoursePoints / $userTotalPoints) * 100 : 0;
+        // Obtenemos el total de puntos recibidos por el usuario de los alumnos del curso del college
+        $total_points_received = PointAlumnAction::where('user_send_id', $idTeacher)
+            ->whereHas('userRecept.teachers.course.college', function ($query) use ($collegeId) {
+                $query->where('id', $collegeId);
+            })
+            ->sum('points');
+
+        // Calculamos el porcentaje de puntaje dado a los alumnos
+        if ($total_points_all_users != 0) {
+            $pointsPercentage = (($total_points_sent - $total_points_received) / $total_points_all_users) * 100;
+        }
+
         return round($pointsPercentage, 2);
     }
 
