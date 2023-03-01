@@ -229,7 +229,7 @@ class DashboardController extends Controller
                         "title" => "% de puntos entre Alumnos",
                         "icon" => "fas fa-users",
                         "color" => "bg-success",
-                        "value" => $student_points_percentage,
+                        "value" => $student_points_percentage . "%",
                         "url" => "acciones",
                     ),
                     "registered_colleges" => array(
@@ -276,7 +276,7 @@ class DashboardController extends Controller
                         "icon" => "fas fa fa-shopping-cart",
                         "color" => "bg-blue",
                         "value" => $porcentage_productsPurchases . "%",
-                        "url" => "productos",
+                        "url" => "productos-cat",
                     ),
                     "% of notifications" => array(
                         "title" => "% de Acciones realizadas",
@@ -369,18 +369,14 @@ class DashboardController extends Controller
     public function actionsUsedAlumns()
     {
         $percentageActions = 0;
-        $totalActions = Action::count();
+        $studentActionsCount = PointAlumnAction::whereHas('userRecept.roles', function ($query) {
+            $query->where('role', env("ROLALU"));
+        })->count();
 
-        $topAction = Action::withCount('pointsUserActions')
-            ->where('type', env("ROLALU"))
-            ->orderBy('points_user_actions_count', 'desc')
-            ->first();
+        $totalActionsCount = Action::where("status", "!=", 0)->count();
 
-        if ($topAction) {
-            $percentageActions = round(($topAction->points_user_actions_count / $totalActions) * 100, 2);
-        } else {
-            $percentageActions = 0;
-        }
+        $percentageActions = ($studentActionsCount / $totalActionsCount) * 100;
+
         return $percentageActions;
     }
 
@@ -388,28 +384,27 @@ class DashboardController extends Controller
     {
         $student_points_percentage = 0;
 
-        $total_points = PointAlumnAction::whereHas('action', function ($query) {
-            $query->where('type', '=', env("ROLALU"));
+        $studentPointsActionsCount = PointAlumnAction::whereHas('userRecept.roles', function ($query) {
+            $query->where('role', env("ROLALU"));
         })->sum('points');
 
-        $student_points = PointAlumnAction::where('user_send_id', '<>', 'user_recept_id')
-            ->whereHas('action', function ($query) {
-                $query->where('type', '=', env("ROLALU"));
-            })
-            ->sum('points');
+        $studentPointsCount = User::whereHas('roles', function ($query) {
+            $query->where('role', env("ROLALU"));
+        })->sum('points');
 
-        if ($total_points > 0) {
-            $student_points_percentage = ($student_points / $total_points) * 100;
-        }
-        return $student_points_percentage;
+        $student_points_percentage = ($studentPointsActionsCount / $studentPointsCount) * 100;
+
+        return round($student_points_percentage, 2);
     }
 
     public function countCollegeActives()
     {
-        $registered_colleges = College::whereHas('courses')
-            ->withCount('courses')
+        $collegesCount = College::where('status', 1)
+            ->orWhereHas('courses', function ($query) {
+                $query->where('status', 1);
+            })
             ->count();
-        return $registered_colleges;
+        return $collegesCount;
     }
 
     public function porcentageViewsNotifications()
@@ -436,19 +431,29 @@ class DashboardController extends Controller
     public function porcentajeStudentsCourse($collegeId)
     {
         $percentage = 0;
-        $activeStatus = 1; // Este valor representa el estado de un estudiante activo
+        $alumno_role_id = env("ROLALU");
+        $alumnos = User::whereHas('roles', function ($query) use ($alumno_role_id) {
+            $query->where('role', $alumno_role_id);
+        })
+            ->whereHas('colleges', function ($query) use ($collegeId) {
+                $query->where('college_id', $collegeId);
+            })
+            ->whereHas('students', function ($query) use ($collegeId) {
+                $query->whereHas('course', function ($query) use ($collegeId) {
+                    $query->where('college_id', $collegeId);
+                });
+            })
+            ->where('status', "!=", 0)
+            ->count();
 
-        $studentsCount = Student::whereHas('course.college', function ($query) use ($collegeId) {
-            $query->where('id', $collegeId);
-        })->whereHas('user', function ($query) use ($activeStatus) {
-            $query->where('status', $activeStatus);
+        $total_alumnos = User::whereHas('roles', function ($query) use ($alumno_role_id) {
+            $query->where('role', $alumno_role_id);
         })->count();
 
-        $coursesCount = Course::where('college_id', $collegeId)->count();
-
-        if ($coursesCount > 0) {
-            $studentsPerCourse = $studentsCount - $coursesCount;
-            $percentage = ($studentsPerCourse / $studentsCount) * 100;
+        if ($total_alumnos > 0) {
+            $percentage = $alumnos / $total_alumnos * 100;
+        } else {
+            $percentage = 0;
         }
 
         return round($percentage, 2);
@@ -488,14 +493,25 @@ class DashboardController extends Controller
         $percentActions = 0;
         $totalActions = PointAlumnAction::sum('points');
 
-        $userActions = PointAlumnAction::where(function ($query) use ($collegeId) {
-            $query->whereHas('userSend.colleges', function ($query) use ($collegeId) {
+        $userActions = PointAlumnAction::whereHas('userRecept.roles', function ($query) {
+            $query->where('role', env("ROLALU"));
+        })
+            ->whereHas('userRecept.colleges', function ($query) use ($collegeId) {
                 $query->where('college_id', $collegeId);
             })
-                ->orWhereHas('userRecept.colleges', function ($query) use ($collegeId) {
-                    $query->where('college_id', $collegeId);
-                });
-        })->sum('points');
+            ->whereHas('userRecept.students.course.college', function ($query) use ($collegeId) {
+                $query->where('college_id', $collegeId);
+            })
+            ->orWhereHas('userSend.roles', function ($query) {
+                $query->where('role', env("ROLALU"));
+            })
+            ->whereHas('userSend.colleges', function ($query) use ($collegeId) {
+                $query->where('college_id', $collegeId);
+            })
+            ->whereHas('userSend.students.course.college', function ($query) use ($collegeId) {
+                $query->where('college_id', $collegeId);
+            })
+            ->sum('points');
 
         if ($totalActions > 0) {
             $percentActions = ($userActions / $totalActions) * 100;
@@ -561,50 +577,55 @@ class DashboardController extends Controller
         return $alumnos;
     }
 
-    public function porcentageActionsForAlumns($idTeacher, $collegeId)
+    public function porcentageActionsForAlumns($IdTeacher, $collegeId)
     {
         $actionsPercentage = 0;
-        // Obtenemos el total de puntos enviados por el usuario a sus alumnos en el curso del college
-        $total_points_sent = PointAlumnAction::where('user_send_id', $idTeacher)
-            ->whereHas('userSend.teachers.course.college', function ($query) use ($collegeId) {
-                $query->where('id', $collegeId);
+        $totalPointsActionsByCollege = PointAlumnAction::whereHas('userRecept.roles', function ($query) {
+            $query->where('role', env("ROLALU"));
+        })
+            ->whereHas('userRecept.colleges', function ($query) use ($collegeId) {
+                $query->where('college_id', $collegeId);
+            })
+            ->whereHas('userRecept.students.course.college', function ($query) use ($collegeId) {
+                $query->where('college_id', $collegeId);
+            })
+            ->orWhereHas('userSend.roles', function ($query) {
+                $query->where('role', env("ROLALU"));
+            })
+            ->whereHas('userSend.colleges', function ($query) use ($collegeId) {
+                $query->where('college_id', $collegeId);
+            })
+            ->whereHas('userSend.students.course.college', function ($query) use ($collegeId) {
+                $query->where('college_id', $collegeId);
             })
             ->sum('points');
 
-        // Obtenemos el total de puntos de todas las acciones del usuario
-        $total_points_all_users = PointAlumnAction::sum('points');
+        $totalPointsActionsByUsers = PointAlumnAction::whereHas('userRecept', function ($query) use ($collegeId) {
+            $query->whereHas('colleges', function ($query) use ($collegeId) {
+                $query->where('college_id', $collegeId);
+            });
+        })->whereHas('userSend', function ($query) use ($IdTeacher) {
+            $query->where('id', $IdTeacher);
+        })->sum('points');
 
-        // Calculamos el porcentaje de puntaje dado a los alumnos
-        if ($total_points_all_users != 0) {
-            $actionsPercentage = -1 * (($total_points_sent - $total_points_all_users / $total_points_all_users * 100));
-        }
-
+        $actionsPercentage = ($totalPointsActionsByUsers / $totalPointsActionsByCollege) * 100;
         return round($actionsPercentage, 2);
     }
 
-    public function porcentageActionsForTeacherAllAlumns($idTeacher, $collegeId)
+    public function porcentageActionsForTeacherAllAlumns($IdTeacher, $collegeId)
     {
-        // Obtenemos el total de puntos enviados por todos los usuarios a los alumnos del curso del college
-        $total_points_all_users = PointAlumnAction::sum('points');
+        $pointsPercentage = 0;
+        $totalPointsByCourse = PointAlumnAction::whereHas('userRecept', function ($query) use ($collegeId) {
+            $query->whereHas('colleges', function ($query) use ($collegeId) {
+                $query->where('college_id', $collegeId);
+            });
+        })->whereHas('userSend', function ($query) use ($IdTeacher) {
+            $query->where('id', $IdTeacher);
+        })->sum('points');
 
-        // Obtenemos el total de puntos enviados por el usuario a los alumnos del curso del college
-        $total_points_sent = PointAlumnAction::where('user_send_id', $idTeacher)
-            ->whereHas('userSend.teachers.course.college', function ($query) use ($collegeId) {
-                $query->where('id', $collegeId);
-            })
-            ->sum('points');
+        $totalPointsActionsByUser = PointAlumnAction::where('user_send_id', $IdTeacher)->sum('points');
 
-        // Obtenemos el total de puntos recibidos por el usuario de los alumnos del curso del college
-        $total_points_received = PointAlumnAction::where('user_send_id', $idTeacher)
-            ->whereHas('userRecept.teachers.course.college', function ($query) use ($collegeId) {
-                $query->where('id', $collegeId);
-            })
-            ->sum('points');
-
-        // Calculamos el porcentaje de puntaje dado a los alumnos
-        if ($total_points_all_users != 0) {
-            $pointsPercentage = (($total_points_sent - $total_points_received) / $total_points_all_users) * 100;
-        }
+        $pointsPercentage = ($totalPointsByCourse > 0) ? ($totalPointsActionsByUser / $totalPointsByCourse) * 100 : 0;
 
         return round($pointsPercentage, 2);
     }

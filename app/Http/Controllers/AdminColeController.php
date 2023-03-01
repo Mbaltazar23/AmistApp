@@ -78,7 +78,7 @@ class AdminColeController extends Controller
         $name = ucwords($request->input('txtNombre'));
         $email = ucwords($request->input('txtEmail'));
         $phone = $request->input('txtTelefono');
-        $password = bcrypt(ucwords($name));
+        $password = bcrypt("AmistApp.");
         $address = $request->input('txtDireccion');
         $rolA = env("ROLADMINCOLE");
 
@@ -124,6 +124,7 @@ class AdminColeController extends Controller
 
             $userRole = new UserRoles();
             $userRole->role = $rolA;
+            $userRole->remember_token = Str::random(10);
             $user->roles()->save($userRole);
 
             return response()->json(['status' => true, 'msg' => 'Administrador registrado Exitosamente !!', 'data' => $user]);
