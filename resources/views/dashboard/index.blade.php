@@ -43,6 +43,9 @@
                     @endforeach
                     <!-- ./col -->
                 </div>
+                @if (Auth::user()->roles->first()->role == env('ROLALU'))
+                    @include('templates.modals.notification.listNotification')
+                @endif
             </div><!-- /.container-fluid -->
         </section>
         <!-- /.content -->
