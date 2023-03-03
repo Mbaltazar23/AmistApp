@@ -160,17 +160,22 @@ class CourseController extends Controller
         ]);
     }
 
-    public function getSelectCourses()
+    public function getSelectCourses($select)
     {
         $courses = Course::where('status', '!=', 0)
-            ->where('college_id', Auth::user()->colleges->first()->college_id)
-            ->get();
-
+            ->where('college_id', Auth::user()->colleges->first()->college_id);
+    
+        if ($select == 'alumno') {
+            $courses = $courses->has('teachers');
+        } 
+        
+        $courses = $courses->get();
+    
         $html = '<option value="0">Seleccione un Curso</option>';
         foreach ($courses as $course) {
             $html .= '<option value="' . $course->id . '">' . $course->name . ' ' . $course->section . '</option>';
         }
-
         return $html;
     }
+    
 }

@@ -14,8 +14,8 @@ class PointAlumnAction extends Model
         'user_send_id',
         'user_recept_id',
         'action_id',
+        'remember_token',
     ];
-
 
     public function userSend()
     {

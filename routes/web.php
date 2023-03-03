@@ -99,7 +99,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/courses/setCourse', [CourseController::class, 'setCourse']);
     Route::get('/courses/getCourse/{id}', [CourseController::class, 'getCourse']);
     Route::post('/courses/status/{id}', [CourseController::class, 'setStatus']);
-    Route::post('/courses/select', [CourseController::class, 'getSelectCourses']);
+    Route::post('/courses/select/{rol}', [CourseController::class, 'getSelectCourses']);
     Route::post('/courses/report', [CourseController::class, 'getReport']);
 
     /* Modulo Alumnos */
@@ -122,11 +122,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/productos-cat', [PurchaseController::class, 'purchases']);
     Route::get('/catalogo', [PurchaseController::class, 'purchasesCat']);
     Route::get('/productos-adquiridos', [PurchaseController::class, 'purchasesAlum']);
+    Route::get('/catalogo-alumns',[PurchaseController::class, 'purchasesTeacher']);
     Route::get('/purchases', [PurchaseController::class, 'getPurchasesProducts']);
     Route::get('/purchases/alum', [PurchaseController::class, 'getProductsPurchasesAlum']);
     Route::get('/purchases/cat', [PurchaseController::class, 'getCatalogActive']);
+    Route::get('/purchases/products-teacher',[PurchaseController::class, 'getProductsPurchasesTeacher']);
     Route::get('/purchases/getPurchase/{id}', [PurchaseController::class, 'getPurchaseProduct']);
+    Route::get('/purchases/getPurchaseTe/{id}', [PurchaseController::class, 'getPurchaseProductT']);
     Route::post('/purchases/setPurchase/{id}', [PurchaseController::class, 'setPurchase']);
+    Route::post('/purchases/delPurchase/{id}', [PurchaseController::class, 'returnPurchaseProduct']);
+    Route::post('/purchases/reportForCollege', [PurchaseController::class, 'getReportPurchases']);
+    Route::post('/purchases/reportForTeacher', [PurchaseController::class, 'getReportPurchasesT']);
 
     /* Modulo Puntos - Alumno/Profesor*/
     Route::get('/compañeros', [PointAlumnActionController::class, 'indexActionAlumns']);

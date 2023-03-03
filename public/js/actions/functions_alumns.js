@@ -108,8 +108,9 @@ document.addEventListener(
 
 function fntSelectsAlumns() {
     if (document.querySelector("#listCurso")) {
+        let select ="alumno";
         axios
-            .post("/courses/select")
+            .post(`/courses/select/${select}`)
             .then((response) => {
                 $(".selectCursos select").html(response.data).fadeIn();
             })

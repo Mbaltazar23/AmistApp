@@ -8,7 +8,7 @@ $(document).on("focusin", function (e) {
 window.addEventListener(
     "load",
     function () {
-        tableProductos = $("#tableCatalogo").dataTable({
+        tableProductos = $("#tableCatTeacher").dataTable({
             aProcessing: true,
             aServerSide: true,
             language: {
@@ -29,7 +29,7 @@ window.addEventListener(
                 },
             ],
             ajax: {
-                url: "/purchases",
+                url: "/purchases/products-teacher",
                 method: "GET",
                 dataSrc: function (json) {
                     if (!json.status) {
@@ -54,7 +54,7 @@ window.addEventListener(
 
 function fntViewInfo(idProducto) {
     axios
-        .get(`/purchases/getPurchase/${idProducto}`)
+        .get(`/purchases/getPurchaseTe/${idProducto}`)
         .then(function (response) {
             if (response.data.status) {
                 document.querySelector(".purchase-row01").classList.add("show");
@@ -100,7 +100,7 @@ function fntViewInfo(idProducto) {
 
 function generarReporte() {
     axios
-        .post("/purchases/reportForCollege")
+        .post("/purchases/reportForTeacher")
         .then(function (response) {
             var fecha = new Date();
             let purchasesProducts = response.data.data;
@@ -114,6 +114,7 @@ function generarReporte() {
                 "PUNTOS",
                 "STOCK-TOTAL",
                 "PUNTOS-TOTAL",
+                "ESTUDIANTES",
             ];
             var data = [];
 
@@ -125,20 +126,21 @@ function generarReporte() {
                     purchasesProducts[i].puntos,
                     purchasesProducts[i].total_canjeados,
                     purchasesProducts[i].total_puntos,
+                    purchasesProducts[i].students,
                 ];
             }
 
             pdf.text(
                 20,
                 20,
-                "Reportes de los Productos Canjeados de este Colegio"
+                "Reportes de los Productos Canjeados por los Alumnos del Colegio"
             );
 
             pdf.autoTable(columns, data, {
                 startY: 40,
                 styles: {
-                    cellPadding: 6,
-                    fontSize: 8,
+                    cellPadding: 7,
+                    fontSize: 6,
                     font: "helvetica",
                     textColor: [0, 0, 0],
                     fillColor: [255, 255, 255],
@@ -158,7 +160,7 @@ function generarReporte() {
                     "/" +
                     fecha.getFullYear()
             );
-            pdf.save("ReporteCanjeosProducts.pdf");
+            pdf.save("ReporteCanjeosProductsT.pdf");
             swal("Exito", "Reporte Imprimido Exitosamente..", "success");
         })
         .catch(function (error) {

@@ -82,7 +82,7 @@ class StudentController extends Controller
         $course = $request->input('listCurso');
         $phone = $request->input('txtTelefono');
         $address = $request->input('txtDireccion');
-        $password = bcrypt("1234.");
+        $password = bcrypt("AmistApp.");
         $rol = env('ROLALU');
         $college_id = Auth::user()->colleges->first()->college_id;
 
@@ -128,7 +128,7 @@ class StudentController extends Controller
                 $collegeUser->user_id = $user->id;
                 $collegeUser->save();
 
-                return response()->json(['status' => true, 'msg' => 'Usuario registrado con éxito y asignado al curso', 'data' => $user]);
+                return response()->json(['status' => true, 'msg' => 'Alumno registrado Exitosamente !!', 'data' => $user]);
             } else {
                 // Eliminar usuario si no hay un profesor asignado al curso
                 $user->delete();
@@ -150,28 +150,27 @@ class StudentController extends Controller
             $user->password = $password;
             $user->save();
 
-            // Verificar si el curso ha cambiado
-            $existingStudent = $user->students()->where('course_id', $course)->first();
-            if ($existingStudent) {
-                // El estudiante ya está asignado al curso, no hay que hacer nada más
+            $student = Student::where('user_id', $id)->first();
+
+            if (!$student) {
+                return response()->json(['status' => false, 'msg' => 'El Alumno no está asignado a ningún curso', 'data' => null]);
+            }
+
+            // Si ya tiene el curso asignado, no hay que hacer nada
+            if ($student->course_id == $course) {
+                return response()->json(['status' => true, 'msg' => 'Alumno actualizado Exitosamente !!', 'data' => $user]);
+            }
+
+            // buscar curso por id
+            $courseInfo = Course::with('teachers')->find($course);
+
+            // si el curso existe y tiene profesor asignado, actualizar registro
+            if ($courseInfo && $courseInfo->teachers->isNotEmpty()) {
+                $student->course_id = $course;
+                $student->save();
                 return response()->json(['status' => true, 'msg' => 'Alumno actualizado Exitosamente !!', 'data' => $user]);
             } else {
-                // Verificar si el curso tiene un profesor asignado
-                $courseInfo = Course::with('teachers')->find($course);
-                if ($courseInfo->teachers->isNotEmpty()) {
-                    // Asignar al nuevo curso
-                    $student = new Student();
-                    $student->user_id = $user->id;
-                    $student->course_id = $course;
-                    $user->students()->save($student);
-                    // Eliminar al estudiante del curso anterior
-                    $existingStudent->delete();
-
-                    return response()->json(['status' => true, 'msg' => 'Alumno actualizado y reasignado a nuevo curso', 'data' => $user]);
-                } else {
-                    // No hay profesor asignado, no se puede asignar el curso
-                    return response()->json(['status' => false, 'msg' => 'El Curso no tiene un profesor asignado']);
-                }
+                return response()->json(['status' => false, 'msg' => 'El Curso no existe o no tiene un profesor asignado']);
             }
         }
     }

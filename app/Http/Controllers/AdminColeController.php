@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Course;
-use App\Models\UserRoles;
 use App\Models\CollegeUser;
-use Illuminate\Support\Str;
+use App\Models\Course;
+use App\Models\User;
+use App\Models\UserRoles;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AdminColeController extends Controller
 {
@@ -104,7 +104,7 @@ class AdminColeController extends Controller
                 $user->roles()->save($userRole);
             }
 
-            return response()->json(['status' => true, 'msg' => 'Usuario actualizado con éxito', 'data' => $user]);
+            return response()->json(['status' => true, 'msg' => 'Administrador Actualizado Exitosamente !!', 'data' => $user]);
         } else {
             // crear un nuevo usuario y asignar el rol correspondiente
             $user = new User();
@@ -162,7 +162,6 @@ class AdminColeController extends Controller
                     'idColegioUser' => $collegeUserId,
                     'colegio_id' => $collegeId,
                 ],
-                'msg' => 'Categoría obtenida correctamente',
             ]);
         } else {
             return response()->json([
@@ -226,7 +225,7 @@ class AdminColeController extends Controller
             $collegeUser->user_id = $userId;
             $collegeUser->remember_token = Str::random(10);
             $collegeUser->save();
-            User::where('id',  $userId)->update(['status' => 2]);
+            User::where('id', $userId)->update(['status' => 2]);
 
             return response()->json(['status' => true, 'msg' => 'Colegio vinculado Exitosamente !!']);
         }
@@ -249,7 +248,7 @@ class AdminColeController extends Controller
 
             return response()->json(['status' => true, 'msg' => 'Colegio desvinculado exitosamente']);
         } else {
-            return response()->json(['status' => false, 'msg' => 'El Colegio tiene cursos asociados']);
+            return response()->json(['status' => false, 'msg' => 'El Colegio ya tiene cursos asociados']);
         }
     }
 

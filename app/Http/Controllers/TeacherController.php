@@ -81,7 +81,7 @@ class TeacherController extends Controller
         $course = $request->input('listCurso');
         $phone = $request->input('txtTelefono');
         $address = $request->input('txtDireccion');
-        $password = bcrypt('1234.');
+        $password = bcrypt('AmistApp.');
         $college_id = Auth::user()->colleges->first()->college_id;
         $rol = env("ROLPROFE");
 

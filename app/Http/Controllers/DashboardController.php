@@ -194,7 +194,7 @@ class DashboardController extends Controller
                     "Catalogo" => array(
                         "icon" => "fas fa-solid fa-store",
                         "submodulos" => array(
-                            "Productos" => array("pagina" => "catalogo"),
+                            "Productos" => array("pagina" => "catalogo-alumns"),
                         ),
                     ),
                 );
@@ -369,15 +369,16 @@ class DashboardController extends Controller
     public function actionsUsedAlumns()
     {
         $percentageActions = 0;
-        $studentActionsCount = PointAlumnAction::whereHas('userRecept.roles', function ($query) {
-            $query->where('role', env("ROLALU"));
-        })->count();
+       $studentActionsCount = PointAlumnAction::select('action_id')
+            ->groupBy('action_id')
+            ->get()
+            ->count();
 
         $totalActionsCount = Action::where("status", "!=", 0)->count();
 
         $percentageActions = ($studentActionsCount / $totalActionsCount) * 100;
 
-        return $percentageActions;
+        return round($percentageActions, 2);
     }
 
     public function scoreThemStudents()
@@ -501,7 +502,6 @@ class DashboardController extends Controller
             });
         })->sum('points');
 
-
         if ($totalActions > 0) {
             $percentActions = ($userActions / $totalActions) * 100;
         } else {
@@ -591,14 +591,14 @@ class DashboardController extends Controller
             $query->where('type', 'Alumno');
         })->sum('points');
 
-        $actionsPercentage = ($alumnPointsActions > 0) ? ($alumnPointsActions / $totalPointsActions) * 100 : 0;
+        $actionsPercentage = ($totalPointsActions > 0) ? ($alumnPointsActions / $totalPointsActions) * 100 : 0;
         return round($actionsPercentage, 2);
     }
 
     public function porcentageActionsForTeacherAllAlumns($IdTeacher)
     {
         $pointsPercentage = 0;
-        
+
         $totalPoints = PointAlumnAction::whereHas('action', function ($query) {
             $query->where('type', 'Profesor');
         })

@@ -52,5 +52,28 @@ window.addEventListener(
 
 
 function fntDelCanj(idProducto){
-    
+    swal({
+        title: "Devolver Producto",
+        text: "¿Quiere recuperar sus puntos por este producto?",
+        icon: "warning",
+        buttons: true,
+    }).then((isClosed) => {
+        if (isClosed) {
+            {
+                axios
+                    .post(`/purchases/delPurchase/${idProducto}`)
+                    .then((response) => {
+                        if (response.data.status) {
+                            swal("Exito !!", response.data.msg, "success");
+                            tableProductos.api().ajax.reload();
+                        } else {
+                            swal("Atención!", response.data.msg, "error");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    });
+            }
+        }
+    });
 }

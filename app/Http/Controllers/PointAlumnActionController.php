@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Action;
 use App\Models\Course;
+use App\Models\PointAlumnAction;
 use App\Models\Student;
 use App\Models\Teacher;
-use Illuminate\Support\Str;
+use App\Models\User;
 use Illuminate\Http\Request;
-use App\Models\PointAlumnAction;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class PointAlumnActionController extends Controller
 {

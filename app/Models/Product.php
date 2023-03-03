@@ -16,16 +16,16 @@ class Product extends Model
         'points',
         'stock',
         'status',
-        'created_at'
+        'created_at',
     ];
-
 
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function purchases(){
+    public function purchases()
+    {
         return $this->hasMany(Purchase::class);
     }
 }

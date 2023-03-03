@@ -64,7 +64,7 @@ class ProductController extends Controller
     public function setProduct(Request $request)
     {
         $id = $request->input('idProducto');
-        $name = $request->input('txtNombre');
+        $name = ucwords($request->input('txtNombre'));
         $category = $request->input('listCategoria');
         $points = $request->input('txtPuntos');
         $stock = $request->input('txtStock');

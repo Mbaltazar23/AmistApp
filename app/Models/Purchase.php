@@ -15,6 +15,7 @@ class Purchase extends Model
         'product_id',
         'points',
         'stock',
+        'remember_token',
     ];
 
     public function product()
