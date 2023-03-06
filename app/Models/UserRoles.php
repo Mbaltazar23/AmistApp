@@ -15,6 +15,7 @@ class UserRoles extends Model
         'id',
         'user_id',
         'role',
+        'remember_token'
     ];
 
     public function user()

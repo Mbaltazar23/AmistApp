@@ -30,7 +30,7 @@ class StudentController extends Controller
         $college_id = Auth::user()->colleges->first()->college_id;
 
         $students = User::whereHas('roles', function ($query) {
-            $query->where('role', env("ROLALU"));
+            $query->where('role', "Alumno");
         })
             ->whereHas('students.course', function ($query) use ($college_id) {
                 $query->where('college_id', $college_id);
@@ -111,6 +111,7 @@ class StudentController extends Controller
 
             $userRole = new UserRoles();
             $userRole->role = $rol;
+            $userRole->remember_token = Str::random(10);
             $user->roles()->save($userRole);
 
             // Verificar si el curso tiene un profesor asignado

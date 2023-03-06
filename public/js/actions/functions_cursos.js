@@ -210,7 +210,7 @@ function openModal() {
 
 function generarReporte() {
     axios
-        .post("/courses/report/")
+        .post("/courses/report")
         .then(function (response) {
             var fecha = new Date();
             var cursos = response.data.data;
@@ -251,7 +251,7 @@ function generarReporte() {
                 startY: 40,
                 styles: {
                     cellPadding: 8,
-                    fontSize: 8,
+                    fontSize: 6,
                     font: "helvetica",
                     textColor: [0, 0, 0],
                     fillColor: [255, 255, 255],

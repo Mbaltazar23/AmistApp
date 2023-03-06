@@ -19,7 +19,6 @@ class CreateCoursesTable extends Migration
             $table->string('name')->nullable();
             $table->string('section');
             $table->unsignedBigInteger('college_id');
-            $table->text('address')->nullable();
             $table->foreign('college_id')
                 ->references('id')->on('colleges')
                 ->onDelete('cascade');

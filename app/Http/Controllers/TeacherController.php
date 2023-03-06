@@ -30,7 +30,7 @@ class TeacherController extends Controller
         $college_id = Auth::user()->colleges->first()->college_id;
 
         $teachers = User::whereHas('roles', function ($query) {
-            $query->where('role', env("ROLPROFE"));
+            $query->where('role', "Profesor");
         })->whereHas('teachers.course', function ($query) use ($college_id) {
             $query->where('college_id', $college_id);
         })

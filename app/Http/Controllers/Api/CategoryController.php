@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\Category;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class CategoryController extends Controller
 {
@@ -31,6 +32,7 @@ class CategoryController extends Controller
         $category = Category::create([
             'name' => $request->name,
             'status' => $request->status,
+            'remember_token' => Str::random(10),
         ]);
         return response()->json($category);
     }
