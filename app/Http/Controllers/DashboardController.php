@@ -12,6 +12,7 @@ use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -19,6 +20,7 @@ class DashboardController extends Controller
     public function index()
     {
         $cardsPanel = $this->cardsPanelDashboard();
+
         $page_tag = Auth::user()->roles->first()->role != env("ROLADMIN") ?
         env("NOMBRE_WEB") . "/" . env("NOMBRE_DASHBOARD") . ' - ' . Auth::user()->roles->first()->role :
         env("NOMBRE_WEB") . " - Dashboard";
@@ -28,7 +30,7 @@ class DashboardController extends Controller
             'page_functions_js' => 'functions_dashboard.js',
         ];
         if (!Auth::check()) {
-            return view('login', compact('data', 'cardsPanel'));
+            return view('login', compact('data'));
         }
 
         return view('dashboard.index', compact('data', 'cardsPanel'));
@@ -369,7 +371,7 @@ class DashboardController extends Controller
     public function actionsUsedAlumns()
     {
         $percentageActions = 0;
-       $studentActionsCount = PointAlumnAction::select('action_id')
+        $studentActionsCount = PointAlumnAction::select('action_id')
             ->groupBy('action_id')
             ->get()
             ->count();
@@ -613,6 +615,47 @@ class DashboardController extends Controller
         $pointsPercentage = ($pointsGiven > 0) ? ($pointsGiven / $totalPoints) * 100 : 0;
 
         return round($pointsPercentage, 2);
+    }
+
+    public function getNotificationsToShow()
+    {
+        $notification = Notification::where('status', "!=", 0)->inRandomOrder()->first();
+        $notificationsToShow = [];
+        $now = Carbon::now();
+
+        if ($notification) {
+            // Obtener el tiempo límite de la notificación
+            $timeLimit = Carbon::now()->addHours(72);
+
+            $timeLimit = $now->addHours(72); // Crear el límite de tiempo
+            $diffInDays = $now->diffInDays($timeLimit);
+
+            if ($diffInDays > 1) {
+                $timeLeft = $diffInDays . ' días';
+            } else if ($diffInDays == 1) {
+                $timeLeft = '1 día';
+            } else {
+                $diffInHours = $now->diffInHours($timeLimit);
+
+                if ($diffInHours > 1) {
+                    $timeLeft = $diffInHours . ' horas';
+                } else {
+                    $timeLeft = '1 hora';
+                }
+            }
+            $timeLeft = $timeLimit->diffForHumans();
+            $notificationsToShow[] = [
+                'id' => $notification->id,
+                'message' => $notification->message,
+                'type' => $notification->type,
+                'points' => $notification->points,
+                'time_left' => $timeLeft,
+                'encryptedId' => encrypt($notification->id),
+            ];
+
+        }
+
+        return $notificationsToShow;
     }
 
 }

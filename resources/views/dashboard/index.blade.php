@@ -43,7 +43,7 @@
                     @endforeach
                     <!-- ./col -->
                 </div>
-                @if (Auth::user()->roles->first()->role == env('ROLALU'))
+                @if (Auth::user()->roles->first()->role == "Alumno")
                     @include('templates.modals.notification.listNotification')
                 @endif
             </div><!-- /.container-fluid -->
