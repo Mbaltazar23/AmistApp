@@ -20,6 +20,7 @@ class CreateNotificationsTable extends Migration
             $table->enum('type', ['Question', 'Video/Message']);
             $table->integer('points');
             $table->integer('status')->default(1);
+            $table->timestamp('expiration_date')->nullable();
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
             $table->rememberToken();

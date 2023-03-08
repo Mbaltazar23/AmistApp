@@ -16,28 +16,33 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body">
-                <ul class="todo-list" data-widget="todo-list">
-                    @foreach ($notificationsToShow as $notification)
-                        <li>
-                            <!-- drag handle -->
-                            <span class="handle">
-                                <i class="fas fa-ellipsis-v"></i>
-                                <i class="fas fa-ellipsis-v"></i>
-                            </span>
-                            <!-- todo text -->
-                            <span class="text">{{ $notification['message'] }}</span>
-                            <!-- Emphasis label -->
-                            <small class="badge badge-danger"><i class="far fa-clock"></i>
-                                {{ $notification['time_left'] }}</small>
-                            <!-- General tools such as edit or delete-->
-                            <div class="tools">
-                                <i class="fas fa-edit" data-notification-id="{{ $notification['encryptedId'] }}"></i>
-                                <i class="fas fa-trash-o"></i>
-                            </div>
-                        </li>
-                    @endforeach
-                </ul>
+                @if (!empty($notificationsToShow))
+                    <ul class="todo-list" data-widget="todo-list">
+                        @foreach ($notificationsToShow as $notification)
+                            <li>
+                                <!-- drag handle -->
+                                <span class="handle">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </span>
+                                <!-- todo text -->
+                                <span class="text">{{ $notification['message'] }}</span>
+                                <!-- Emphasis label -->
+                                <small class="badge badge-danger"><i class="far fa-clock"></i>
+                                    {{ $notification['time_left'] }}</small>
+                                <!-- General tools such as edit or delete-->
+                                <div class="tools">
+                                    <i class="fas fa-edit" data-notification-id="{{ $notification['encryptedId'] }}" onclick="getNotificationQuest()"></i>
+                                    <i class="fas fa-trash-o"></i>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p>No hay notificaciones disponibles.</p>
+                @endif
             </div>
+            
             <!-- /.card-body -->
         </div>
     </section>

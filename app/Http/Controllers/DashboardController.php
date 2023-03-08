@@ -11,6 +11,7 @@ use App\Models\Purchase;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -306,25 +307,25 @@ class DashboardController extends Controller
                     "companions of student" => array(
                         "title" => "Cantidad de compañeros",
                         "icon" => "fas fa fa-users",
-                        "color" => "bg-warning",
+                        "color" => "bg-orange",
                         "value" => $countsStudents,
                         "url" => "compañeros",
                     ),
                     "porcentage notifications for student" => array(
                         "title" => "% de Notificaciones contestadas",
                         "icon" => "fa fa-envelope-open-text",
-                        "color" => "bg-success",
+                        "color" => "bg-blue",
                         "value" => $porcentageProductsPurchases . "%",
                         "url" => "compañeros",
                     ),
                     "registered_colleges" => array(
                         "title" => "Cantidad de Productos adquiridos",
                         "icon" => "fas fa fa-cube",
-                        "color" => "bg-blue",
+                        "color" => "bg-purple",
                         "value" => $productosPurchases,
                         "url" => "productos-adquiridos",
                     ));
-            } else if ($role->role == env("ROLPROFE")) {
+            } else {
                 $idUser = Auth::user()->id;
                 $collegeId = Auth::user()->colleges->first()->college_id;
 
@@ -541,9 +542,18 @@ class DashboardController extends Controller
     public function porcentageNotificationsForAlum($idAlum)
     {
         $percentAnswered = 0;
-        $user = User::with('notifications')->find($idAlum);
-        $totalNotifications = $user->notifications->count();
-        $answeredNotifications = $user->notifications->where('status', 1)->count();
+        $user = User::where('id', $idAlum)
+            ->withCount(['notifications', 'notifications as answered_notifications_count' => function ($query) {
+                $query->where('status', 2);
+            }])
+            ->whereHas('notifications', function ($query) {
+                $query->where('status', 1);
+            })
+            ->first();
+
+        $totalNotifications = $user->notifications_count;
+        $answeredNotifications = $user->answered_notifications_count;
+
         if ($answeredNotifications > 0) {
             $percentAnswered = round(($answeredNotifications / $totalNotifications) * 100);
         }
@@ -619,43 +629,39 @@ class DashboardController extends Controller
 
     public function getNotificationsToShow()
     {
-        $notification = Notification::where('status', "!=", 0)->inRandomOrder()->first();
-        $notificationsToShow = [];
         $now = Carbon::now();
+        $idUser = Auth::user()->id;
 
-        if ($notification) {
-            // Obtener el tiempo límite de la notificación
-            $timeLimit = Carbon::now()->addHours(72);
+        $notifications = Notification::where('status', 2)
+            ->where('expiration_date', '>', $now)
+            ->where('updated_at', '>=', $now->startOfDay())
+            ->whereDoesntHave('usersNotifications', function ($query) use ($idUser) {
+                $query->where('user_id', $idUser);
+            })
+            ->orderBy('updated_at', 'desc')
+            ->get();
 
-            $timeLimit = $now->addHours(72); // Crear el límite de tiempo
-            $diffInDays = $now->diffInDays($timeLimit);
+        $notificationsToShow = [];
 
-            if ($diffInDays > 1) {
-                $timeLeft = $diffInDays . ' días';
-            } else if ($diffInDays == 1) {
-                $timeLeft = '1 día';
-            } else {
-                $diffInHours = $now->diffInHours($timeLimit);
-
-                if ($diffInHours > 1) {
-                    $timeLeft = $diffInHours . ' horas';
-                } else {
-                    $timeLeft = '1 hora';
-                }
+        foreach ($notifications as $notification) {
+            // Verificar si el usuario ya ha respondido a esta notificación
+            $userNotification = UserNotification::where('user_id', $idUser)
+                ->where('notification_id', $notification->id)
+                ->first();
+            if (!$userNotification) {
+                $notificationsToShow[] = [
+                    'id' => $notification->id,
+                    'message' => $notification->message,
+                    'type' => $notification->type,
+                    'points' => $notification->points,
+                    'time_left' => $notification->time_left,
+                    'encryptedId' => encrypt($notification->id),
+                ];
             }
-            $timeLeft = $timeLimit->diffForHumans();
-            $notificationsToShow[] = [
-                'id' => $notification->id,
-                'message' => $notification->message,
-                'type' => $notification->type,
-                'points' => $notification->points,
-                'time_left' => $timeLeft,
-                'encryptedId' => encrypt($notification->id),
-            ];
-
         }
 
         return $notificationsToShow;
+
     }
 
 }

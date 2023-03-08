@@ -369,11 +369,15 @@ function fntViewInfo(nro, idNotificacion) {
         .get(`/notifications/getNotification/${idNotificacion}`)
         .then(function (response) {
             if (response.data.status) {
-                let estado =
-                    response.data.data.status == 1
-                        ? '<span class="badge badge-success">Activo</span>'
-                        : '<span class="badge badge-danger">Inactivo</span>';
-
+                let estado = "";
+                if (response.data.data.status == 1) {
+                    estado =
+                        '<span class="badge badge-success">En espera</span>';
+                } else if (response.data.data.status == 2) {
+                    estado = '<span class="badge badge-dark">Activo</span>';
+                } else {
+                    estado = '<span class="badge badge-danger">Inactivo</span>';
+                }
                 document.querySelector("#celNro").innerHTML = nro;
                 document.querySelector("#celNombre").innerHTML =
                     response.data.data.mensaje;
@@ -672,6 +676,63 @@ function fntActivateInfo(idnotificacion) {
                 .then((response) => {
                     if (response.data.status) {
                         swal("Habilitada !!", response.data.msg, "success");
+                        tableNotificaciones.api().ajax.reload();
+                    } else {
+                        swal("Atención!", response.data.msg, "error");
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
+    });
+}
+
+function fntVisibleNot(idNotificacion) {
+    swal({
+        title: "Dar Visibilidad a la Notificacion",
+        text: "¿Realmente quiere dejar visible esta notificacion?",
+        icon: "info",
+        buttons: true,
+    }).then((isClosed) => {
+        if (isClosed) {
+            let status = 2;
+            axios
+                .post(`/notifications/visible/${idNotificacion}`, {
+                    status: status,
+                })
+                .then((response) => {
+                    if (response.data.status) {
+                        swal("Exito !!", response.data.msg, "success");
+                        tableNotificaciones.api().ajax.reload();
+                    } else {
+                        swal("Atención!", response.data.msg, "error");
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
+    });
+}
+
+function fntHideNot(idNotificacion) {
+    swal({
+        title: "Ocultar a la Notificacion",
+        text: "¿Realmente quiere dejar oculta esta notificacion?",
+        icon: "warning",
+        dangerMode: true,
+        buttons: true,
+    }).then((isClosed) => {
+        if (isClosed) {
+            let status = 1;
+            axios
+                .post(`/notifications/visible/${idNotificacion}`, {
+                    status: status,
+                })
+                .then((response) => {
+                    if (response.data.status) {
+                        swal("Exito !!", response.data.msg, "success");
                         tableNotificaciones.api().ajax.reload();
                     } else {
                         swal("Atención!", response.data.msg, "error");

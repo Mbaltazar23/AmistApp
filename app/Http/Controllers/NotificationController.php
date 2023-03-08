@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Answer;
+use App\Models\Notification;
 use App\Models\Question;
 use App\Models\UserNotification;
-use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
-
 
 class NotificationController extends Controller
 {
@@ -31,6 +31,7 @@ class NotificationController extends Controller
             $btnView = '';
             $btnEdit = '';
             $btnDelete = '';
+            $btnActivNot = '';
             $row = [
                 'nro' => $key + 1,
                 'mensaje' => $notification->message,
@@ -39,17 +40,25 @@ class NotificationController extends Controller
                 'hora' => $notification->created_at->format('H:i:s'),
             ];
             if ($notification->status == 1) {
-                $row['status'] = '<span class="badge badge-success">Activo</span>';
+                $row['status'] = '<span class="badge badge-success">En espera</span>';
                 $btnView = '<button class="btn btn-info btn-sm" onClick="fntViewInfo(' . ($key + 1) . ',' . $notification->id . ')" title="Ver notificacion"><i class="far fa-eye"></i></button>';
                 $btnEdit = '<button class="btn btn-primary  btn-sm" onClick="fntEditInfo(this,' . $notification->id . ')" title="Editar notificacion"><i class="fas fa-pencil-alt"></i></button>';
+                $btnActivNot = '<button class="btn btn-dark btn-sm" onclick="fntVisibleNot(' . $notification->id . ')" title="Activar notificacion"><i class="fas fa-toggle-on"></i></button>';
+                $btnDelete = '<button class="btn btn-danger btn-sm" onClick="fntDelInfo(' . $notification->id . ')" title="Eliminar notificacion"><i class="far fa-trash-alt"></i></button>';
+            } else if ($notification->status == 2) {
+                $row['status'] = '<span class="badge badge-dark">Visible</span>';
+                $btnView = '<button class="btn btn-info btn-sm" onClick="fntViewInfo(' . ($key + 1) . ',' . $notification->id . ')" title="Ver notificacion"><i class="far fa-eye"></i></button>';
+                $btnEdit = '<button class="btn btn-primary  btn-sm" onClick="fntEditInfo(this,' . $notification->id . ')" title="Editar notificacion"><i class="fas fa-pencil-alt"></i></button>';
+                $btnActivNot = '<button class="btn btn-secondary btn-sm" onclick="fntHideNot(' . $notification->id . ')" title="Ocultar notificacion"><i class="fas fa-toggle-on"></i></button>';
                 $btnDelete = '<button class="btn btn-danger btn-sm" onClick="fntDelInfo(' . $notification->id . ')" title="Eliminar notificacion"><i class="far fa-trash-alt"></i></button>';
             } else {
                 $row['status'] = '<span class="badge badge-danger">Inactivo</span>';
                 $btnView = '<button class="btn btn-secondary btn-sm" onClick="fntViewInfo(' . ($key + 1) . ',' . $notification->id . ')" title="Ver notificacion" disabled><i class="far fa-eye"></i></button>';
                 $btnEdit = '<button class="btn btn-secondary btn-sm" onClick="fntEditInfo(this,' . $notification->id . ')" title="Editar notificacion" disabled><i class="fas fa-pencil-alt"></i></button>';
+                $btnActivNot = '<button class="btn btn-secondary btn-sm" onclick="fntVisibleNot(' . $notification->id . ')" title="Activar notificacion"><i class="fas fa-eye"></i></button>';
                 $btnDelete = '<button class="btn btn-dark btn-sm" onClick="fntActivateInfo(' . $notification->id . ')" title="Activar notificacion"><i class="fas fa-toggle-on"></i></button>';
             }
-            $row['options'] = '<div class="text-center">' . $btnView . '  ' . $btnEdit . '  ' . $btnDelete . '</div>';
+            $row['options'] = '<div class="text-center">' . $btnView . '  ' . $btnEdit . '  ' . $btnActivNot . ' ' . $btnDelete . '</div>';
             $data[] = $row;
         }
 
@@ -341,7 +350,30 @@ class NotificationController extends Controller
         if ($status == 1) {
             $message = 'Notificación Habilitada exitosamente !!';
         } else {
-            $message = 'Notificación Inhabilitadad exitosamente !!';
+            $message = 'Notificación Inhabilitada exitosamente !!';
+        }
+
+        return response()->json(['status' => true, 'msg' => $message]);
+    }
+
+    public function setStatusNot($id, Request $request)
+    {
+        $status = $request->input('status');
+        $notification = Notification::find($id);
+
+        if ($status == 1) {
+            $notification->expiration_date = null;
+        } else  {
+            $notification->expiration_date = Carbon::now()->addHours(72);
+        }
+
+        $notification->status = $status;
+        $notification->save();
+
+        if ($status == 1) {
+            $message = 'Notificación Oculta exitosamente !!';
+        } else {
+            $message = 'Notificación Activa exitosamente !!';
         }
 
         return response()->json(['status' => true, 'msg' => $message]);

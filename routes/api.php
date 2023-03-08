@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\TeacherController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,9 +22,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/login', [AuthController::class, 'login']);
-
-Route::get('/categories', [CategoryController::class, 'index']);
-Route::post('/categories', [CategoryController::class, 'store']);
-Route::get('/categories/{category}', [CategoryController::class, 'edit']);
-Route::put('/categories/{category}', [CategoryController::class, 'update']);
-Route::delete('/categories/{category}', [CategoryController::class, 'delete']);
+Route::post('/logout', [AuthController::class, 'logout']);
+Route::get('/alumns', [TeacherController::class, 'index']);
+Route::get('/catalogue', [ProductController::class, 'index']);
+Route::post('/catalogue/setPurchase/{id}', [ProductController::class, 'store']);
+Route::delete('/catalogue/deletePurchase/{id}', [ProductController::class, 'delete']);

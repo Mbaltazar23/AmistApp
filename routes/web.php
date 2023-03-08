@@ -13,6 +13,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\UserNotificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,11 +32,14 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
 Route::middleware('auth')->group(function () {
+    /* Modulo Dashboard */
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::get('/dashboard/profile', [DashboardController::class, 'show'])->name('dashboard.profile');
     Route::get('/dashboard/getProfile', [DashboardController::class, 'getProfile']);
     Route::post('/dashboard/putProfile', [DashboardController::class, 'setProfile']);
+});
 
+Route::middleware(['auth', 'checkrole:' . env("ROLADMIN")])->group(function () {
     /* Modulo Categorias */
     Route::get('/categorias', [CategoryController::class, 'index']);
     Route::get('/categories', [CategoryController::class, 'getCategories']);
@@ -81,6 +85,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications/question/{id}', [NotificationController::class, 'getQuestion']);
     Route::post('/notifications/setQuestion', [NotificationController::class, 'setQuestion']);
     Route::post('/notifications/status/{id}', [NotificationController::class, 'setStatus']);
+    Route::post('/notifications/visible/{id}', [NotificationController::class, 'setStatusNot']);
     Route::post('/notifications/questionDel/{id}', [NotificationController::class, 'deleteQuestion']);
     Route::post('/notifications/report', [NotificationController::class, 'getReport']);
 
@@ -92,7 +97,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/actions/status/{id}', [ActionController::class, 'setStatus']);
     Route::post('/actions/select', [ActionController::class, 'getSelectActions']);
     Route::post('/actions/report', [ActionController::class, 'getReport']);
+});
 
+Route::middleware(['auth', 'checkrole:' . env("ROLADMINCOLE")])->group(function () {
     /* Modulo Cursos */
     Route::get('/cursos', [CourseController::class, 'index']);
     Route::get('/courses', [CourseController::class, 'getCourses']);
@@ -118,20 +125,24 @@ Route::middleware('auth')->group(function () {
     Route::post('/teachers/status/{id}', [TeacherController::class, 'setStatus']);
     Route::post('/teachers/report', [TeacherController::class, 'getReport']);
 
-    /* Modulo Catalogo */
+    /*Modulo Catalogo*/
     Route::get('/productos-cat', [PurchaseController::class, 'purchases']);
+    Route::get('/purchases', [PurchaseController::class, 'getPurchasesProducts']);
+    Route::get('/purchases/getPurchase/{id}', [PurchaseController::class, 'getPurchaseProduct']);
+    Route::post('/purchases/reportForCollege', [PurchaseController::class, 'getReportPurchases']);
+});
+
+Route::middleware(['auth', 'checkrole:' . env("ROLPROFE") . ',' . env("ROLALU")])->group(function () {
+    /* Modulo Catalogo */
     Route::get('/catalogo', [PurchaseController::class, 'purchasesCat']);
     Route::get('/productos-adquiridos', [PurchaseController::class, 'purchasesAlum']);
-    Route::get('/catalogo-alumns',[PurchaseController::class, 'purchasesTeacher']);
-    Route::get('/purchases', [PurchaseController::class, 'getPurchasesProducts']);
+    Route::get('/catalogo-alumns', [PurchaseController::class, 'purchasesTeacher']);
     Route::get('/purchases/alum', [PurchaseController::class, 'getProductsPurchasesAlum']);
     Route::get('/purchases/cat', [PurchaseController::class, 'getCatalogActive']);
-    Route::get('/purchases/products-teacher',[PurchaseController::class, 'getProductsPurchasesTeacher']);
-    Route::get('/purchases/getPurchase/{id}', [PurchaseController::class, 'getPurchaseProduct']);
+    Route::get('/purchases/products-teacher', [PurchaseController::class, 'getProductsPurchasesTeacher']);
     Route::get('/purchases/getPurchaseTe/{id}', [PurchaseController::class, 'getPurchaseProductT']);
     Route::post('/purchases/setPurchase/{id}', [PurchaseController::class, 'setPurchase']);
     Route::post('/purchases/delPurchase/{id}', [PurchaseController::class, 'returnPurchaseProduct']);
-    Route::post('/purchases/reportForCollege', [PurchaseController::class, 'getReportPurchases']);
     Route::post('/purchases/reportForTeacher', [PurchaseController::class, 'getReportPurchasesT']);
 
     /* Modulo Puntos - Alumno/Profesor*/
@@ -141,4 +152,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/alumns-teacher', [PointAlumnActionController::class, 'getAlumnsTeacher']);
     Route::get('/companios/alum/{id}', [PointAlumnActionController::class, 'getStudentAlum']);
     Route::post('/companios/donate', [PointAlumnActionController::class, 'setPointsDonate']);
+
+    /* Modulo Puntos/Notificaciones - Alumno */
+    Route::get('/notificationQuest/getQuestion/{id}', [UserNotificationController::class, 'getNotificationShow']);
+    Route::post('/notificationQuest/setQuestionNot',[UserNotificationController::class, 'setPointsNotification']);
 });
