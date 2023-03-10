@@ -24,6 +24,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/alumns', [TeacherController::class, 'index']);
-Route::get('/catalogue', [ProductController::class, 'index']);
-Route::post('/catalogue/setPurchase/{id}', [ProductController::class, 'store']);
-Route::delete('/catalogue/deletePurchase/{id}', [ProductController::class, 'delete']);
+Route::get('/catalog', [ProductController::class, 'indexCat']);
+Route::get('/catalog-college', [ProductController::class, 'indexCatCollege']);
+Route::get('/catalog-alumn', [ProductController::class, 'indexCatAlum']);
+Route::post('/catalog/setPurchase/{id}', [ProductController::class, 'store']);
+Route::delete('/catalog/deletePurchase/{id}', [ProductController::class, 'delete']);
+Route::get('/points/alumns', [StudentController::class, 'index']);
+Route::get('/points/getAlum/{id}',[StudentController::class, 'show']);
+Route::post('/points/setPointAction', [StudentController::class, 'store']);

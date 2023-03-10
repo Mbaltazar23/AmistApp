@@ -54,7 +54,7 @@ document.addEventListener(
             } else {
                 let formData = new FormData(formCategoria);
                 axios
-                    .post("/categories/setCategoria", formData)
+                    .post("/categories/setCategory", formData)
                     .then(function (response) {
                         if (response.data.status) {
                             $("#modalFormCategorias").modal("hide");

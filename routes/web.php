@@ -26,15 +26,15 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
  */
-
-Route::get('/', [AuthController::class, 'index'])->name('login');
-Route::get('/reset', [AuthController::class, 'resetPassword'])->name('resetPassword');
-Route::get('/change-password', [AuthController::class, 'changePassword'])->name('changePassword');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/login/getEmail', [AuthController::class, 'getEmailUser']);
-Route::post('/login/setPassword', [AuthController::class, 'setPassword']);
-
-Route::post('/logout', [AuthController::class, 'logout']);
+Route::middleware('clearcache')->group(function () {
+    Route::get('/', [AuthController::class, 'index'])->name('login');
+    Route::get('/reset', [AuthController::class, 'resetPassword'])->name('resetPassword');
+    Route::get('/change-password', [AuthController::class, 'changePassword'])->name('changePassword');
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login/getEmail', [AuthController::class, 'getEmailUser']);
+    Route::post('/login/setPassword', [AuthController::class, 'setPassword']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
 
 Route::middleware('auth', 'clearcache')->group(function () {
     /* Modulo Dashboard */
@@ -48,7 +48,7 @@ Route::middleware(['auth', 'checkrole:' . env("ROLADMIN"), 'clearcache'])->group
     /* Modulo Categorias */
     Route::get('/categorias', [CategoryController::class, 'index']);
     Route::get('/categories', [CategoryController::class, 'getCategories']);
-    Route::post('/categories/setCategoria', [CategoryController::class, 'setCategory']);
+    Route::post('/categories/setCategory', [CategoryController::class, 'setCategory']);
     Route::get('/categories/getCategory/{id}', [CategoryController::class, 'getCategory']);
     Route::post('/categories/status/{id}', [CategoryController::class, 'setStatus']);
     Route::post('/categories/select', [CategoryController::class, 'getSelectCategorys']);
