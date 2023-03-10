@@ -256,7 +256,7 @@ class DashboardController extends Controller
 
                 $porcentage_Students = $this->porcentajeStudentsCourse($collegeId);
                 $countTeachers = $this->countsTeachersCourse($collegeId);
-                $porcentage_productsPurchases = $this->porcentageProductsPurchases($collegeId);
+                $porcentage_productsPurchases = $this->counNotifications($collegeId);
                 $percentActions = $this->porcentageStudentPerformActions($collegeId);
 
                 $cardsPanel = array(
@@ -293,7 +293,7 @@ class DashboardController extends Controller
                 $idUser = Auth::user()->id;
                 $pointsAvailable = $this->pointsAvailable($idUser);
                 $countsStudents = $this->countAlumnsUser($idUser);
-                $porcentageProductsPurchases = $this->porcentageNotificationsForAlum($idUser);
+                $counNotifications = $this->countNotificationsForAlum($idUser);
                 $productosPurchases = $this->countProductsPurchasesAlum($idUser);
 
                 $cardsPanel = array(
@@ -312,10 +312,10 @@ class DashboardController extends Controller
                         "url" => "compañeros",
                     ),
                     "porcentage notifications for student" => array(
-                        "title" => "% de Notificaciones contestadas",
+                        "title" => "Notificaciones contestadas",
                         "icon" => "fa fa-envelope-open-text",
                         "color" => "bg-blue",
-                        "value" => $porcentageProductsPurchases . "%",
+                        "value" => $counNotifications,
                         "url" => "compañeros",
                     ),
                     "registered_colleges" => array(
@@ -476,7 +476,7 @@ class DashboardController extends Controller
         return $teachersCount;
     }
 
-    public function porcentageProductsPurchases($collegeId)
+    public function counNotifications($collegeId)
     {
         $percentage = 0;
         $totalStock = Purchase::sum('stock');
@@ -539,25 +539,11 @@ class DashboardController extends Controller
         return $numberOfStudents;
     }
 
-    public function porcentageNotificationsForAlum($idAlum)
+    public function countNotificationsForAlum($idAlum)
     {
-        $percentAnswered = 0;
-        $user = User::where('id', $idAlum)
-            ->withCount(['notifications', 'notifications as answered_notifications_count' => function ($query) {
-                $query->where('status', 2);
-            }])
-            ->whereHas('notifications', function ($query) {
-                $query->where('status', 1);
-            })
-            ->first();
+        $answeredNotifications = UserNotification::where('user_id', $idAlum)->count();
 
-        $totalNotifications = $user->notifications_count;
-        $answeredNotifications = $user->answered_notifications_count;
-
-        if ($answeredNotifications > 0) {
-            $percentAnswered = round(($answeredNotifications / $totalNotifications) * 100);
-        }
-        return $percentAnswered;
+        return $answeredNotifications;
     }
 
     public function countProductsPurchasesAlum($idAlum)

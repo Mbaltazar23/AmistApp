@@ -295,25 +295,32 @@ class PurchaseController extends Controller
             })
             ->with(['category', 'purchases.user.students.course.college'])
             ->first();
-
+        
         if ($product) {
-            $purchase = $product->purchases()->whereHas('user.students.course.college', function ($query) use ($collegeId) {
-                $query->where('id', '=', $collegeId);
-            })->first();
-
+            $purchases = $product->purchases()
+                ->whereHas('user.students.course.college', function ($query) use ($collegeId) {
+                    $query->where('id', '=', $collegeId);
+                })
+                ->get();
+        
+            $uniquePurchases = $purchases->unique('user_id');
+        
+            $totalPurchases = $uniquePurchases->sum('stock');
+            $totalPoints = $uniquePurchases->sum('points');
+        
             $data = [
                 'id' => $product->id,
                 'nombre' => $product->name,
                 'categoria' => $product->category->name,
                 'puntos' => $product->points,
                 'stock' => $product->stock,
-                'fecha' => $purchase->created_at->format('d-m-Y'),
-                'hora' => $purchase->created_at->format('H:i:s'),
+                'fecha' => $purchases->first()->created_at->format('d-m-Y'),
+                'hora' => $purchases->first()->created_at->format('H:i:s'),
                 'status' => $product->status,
-                'points_initial' => $purchase->points,
-                'stock_ven' => $purchase->stock,
+                'points_initial' => $totalPoints,
+                'stock_ven' => $totalPurchases,
             ];
-
+        
             if ($product->image && file_exists(public_path('images/products/' . $product->image))) {
                 $data['image'] = $product->image;
                 $data['url_image'] = asset('images/products/' . $product->image);
@@ -321,7 +328,7 @@ class PurchaseController extends Controller
                 $data['image'] = null;
                 $data['url_image'] = null;
             }
-
+        
             return response()->json([
                 'status' => true,
                 'data' => $data,
@@ -330,9 +337,10 @@ class PurchaseController extends Controller
         } else {
             return response()->json([
                 'status' => false,
-                'msg' => 'No se pudo obtenerCanjear Producto',
+                'msg' => 'No se pudo obtener el producto',
             ]);
         }
+        
 
     }
 

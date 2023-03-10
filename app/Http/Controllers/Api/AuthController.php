@@ -22,7 +22,6 @@ class AuthController extends Controller
         if ($user && Hash::check($password, $user->password)) {
             // Inicializa la imagen de perfil en blanco
             $imgPerfil = '';
-
             // Busca el rol del usuario y establece la imagen de perfil correspondiente
             switch ($user->roles->first()->role) {
                 case env("ROLADMIN"):

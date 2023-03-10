@@ -28,10 +28,15 @@ use Illuminate\Support\Facades\Route;
  */
 
 Route::get('/', [AuthController::class, 'index'])->name('login');
+Route::get('/reset', [AuthController::class, 'resetPassword'])->name('resetPassword');
+Route::get('/change-password', [AuthController::class, 'changePassword'])->name('changePassword');
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login/getEmail', [AuthController::class, 'getEmailUser']);
+Route::post('/login/setPassword', [AuthController::class, 'setPassword']);
+
 Route::post('/logout', [AuthController::class, 'logout']);
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'clearcache')->group(function () {
     /* Modulo Dashboard */
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::get('/dashboard/profile', [DashboardController::class, 'show'])->name('dashboard.profile');
@@ -39,7 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/dashboard/putProfile', [DashboardController::class, 'setProfile']);
 });
 
-Route::middleware(['auth', 'checkrole:' . env("ROLADMIN")])->group(function () {
+Route::middleware(['auth', 'checkrole:' . env("ROLADMIN"), 'clearcache'])->group(function () {
     /* Modulo Categorias */
     Route::get('/categorias', [CategoryController::class, 'index']);
     Route::get('/categories', [CategoryController::class, 'getCategories']);
@@ -95,11 +100,10 @@ Route::middleware(['auth', 'checkrole:' . env("ROLADMIN")])->group(function () {
     Route::post('/actions/setAction', [ActionController::class, 'setAction']);
     Route::get('/actions/getAction/{id}', [ActionController::class, 'getAction']);
     Route::post('/actions/status/{id}', [ActionController::class, 'setStatus']);
-    Route::post('/actions/select', [ActionController::class, 'getSelectActions']);
     Route::post('/actions/report', [ActionController::class, 'getReport']);
 });
 
-Route::middleware(['auth', 'checkrole:' . env("ROLADMINCOLE")])->group(function () {
+Route::middleware(['auth', 'checkrole:' . env("ROLADMINCOLE"), 'clearcache'])->group(function () {
     /* Modulo Cursos */
     Route::get('/cursos', [CourseController::class, 'index']);
     Route::get('/courses', [CourseController::class, 'getCourses']);
@@ -132,7 +136,9 @@ Route::middleware(['auth', 'checkrole:' . env("ROLADMINCOLE")])->group(function 
     Route::post('/purchases/reportForCollege', [PurchaseController::class, 'getReportPurchases']);
 });
 
-Route::middleware(['auth', 'checkrole:' . env("ROLPROFE") . ',' . env("ROLALU")])->group(function () {
+Route::middleware(['auth', 'checkrole:' . env("ROLPROFE") . ',' . env("ROLALU"), 'clearcache'])->group(function () {
+    /* Modulo Select Acciones */
+    Route::post('/actions/select', [ActionController::class, 'getSelectActions']);
     /* Modulo Catalogo */
     Route::get('/catalogo', [PurchaseController::class, 'purchasesCat']);
     Route::get('/productos-adquiridos', [PurchaseController::class, 'purchasesAlum']);
@@ -155,5 +161,5 @@ Route::middleware(['auth', 'checkrole:' . env("ROLPROFE") . ',' . env("ROLALU")]
 
     /* Modulo Puntos/Notificaciones - Alumno */
     Route::get('/notificationQuest/getQuestion/{id}', [UserNotificationController::class, 'getNotificationShow']);
-    Route::post('/notificationQuest/setQuestionNot',[UserNotificationController::class, 'setPointsNotification']);
+    Route::post('/notificationQuest/setQuestionNot', [UserNotificationController::class, 'setPointsNotification']);
 });

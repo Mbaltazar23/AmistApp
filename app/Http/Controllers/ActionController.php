@@ -92,7 +92,8 @@ class ActionController extends Controller
                 $action->points = $points;
                 $action->remember_token = $remember_token;
                 $action->save();
-                return response()->json(['status' => true, 'msg' => 'Accion registrada Exitosamente !!', 'data' => $action]);
+                return response()->json(['status' => true, 'msg' => 'Accion registrada Exitosamente !!', 
+                'data' => $action]);
             }
         }
     }
