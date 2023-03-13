@@ -50,6 +50,7 @@ Route::middleware('jwt.auth', 'jwt.unauthorized')->group(function () {
 
         /* Modulo Notificaciones */
         Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::post('/notifications/response',[NotificationController::class, 'store']);
     });
 
     /* Modulo Profesor - Funciones : Alumnos, Catalogo-Alumnos */
