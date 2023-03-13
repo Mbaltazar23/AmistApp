@@ -24,6 +24,7 @@ class TeacherController extends Controller
             })
             ->with('user')
             ->get();
+            
         return response()->json($students);
     }
 }

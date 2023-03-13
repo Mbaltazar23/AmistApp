@@ -25,7 +25,7 @@ class ProductController extends Controller
         foreach ($products as $product) {
             $data[] = [
                 'id' => $product->id,
-                'nameProduct' => $product->name,
+                'nameProduct' => ucfirst($product->name),
                 'imageProduct' => asset('images/products/' . $product->image),
                 'category' => $product->category->name,
                 'status' => $product->status,
@@ -60,7 +60,8 @@ class ProductController extends Controller
             $totalPurchases = $uniquePurchases->sum('stock');
             $totalPoints = $uniquePurchases->sum('points');
             $data[] = [
-                'nameProduct' => $product->name,
+                'id' => $product->id,
+                'nameProduct' => ucfirst($product->name),
                 'urlImage' => asset('images/products/' . $product->image),
                 'categoria' => $product->category->name,
                 'status' => $product->status,
@@ -107,7 +108,7 @@ class ProductController extends Controller
 
                     $data[] = [
                         'id' => $product->id,
-                        'nameProduct' => $product->name,
+                        'nameProduct' => ucfirst($product->name),
                         'categoria' => $product->category->name,
                         'puntos' => $product->points,
                         'stock' => $totalPurchases,

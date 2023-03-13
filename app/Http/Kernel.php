@@ -53,10 +53,13 @@ class Kernel extends HttpKernel
      *
      * @var array<string, class-string|string>
      */
-    protected $routeMiddleware = [
+     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
 	    'checkrole' => \App\Http\Middleware\CheckRole::class,
         'clearcache' => \App\Http\Middleware\ClearViewCacheMiddleware::class,
+        'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
+        'jwt.unauthorized' => \Tymon\JWTAuth\Http\Middleware\UnauthorizedMiddleware::class,
+        'role' => \Tymon\JWTAuth\Http\Middleware\RoleMiddleware::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,

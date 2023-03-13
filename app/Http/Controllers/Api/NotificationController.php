@@ -113,7 +113,7 @@ class NotificationController extends Controller
      */
     public function show($id)
     {
-        $intId = decrypt($id);
+        $intId = intval($id);
 
         $notificacion = Notification::with('questions.answers')->find($intId);
 

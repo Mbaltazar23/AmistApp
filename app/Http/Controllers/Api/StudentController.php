@@ -11,13 +11,9 @@ use App\Models\PointAlumnAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
-class StudentsController extends Controller
+class StudentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
         $userId = Auth::id();
@@ -52,7 +48,6 @@ class StudentsController extends Controller
 
             
         }
-
         return response()->json($data);
     }
 
@@ -64,7 +59,7 @@ class StudentsController extends Controller
      */
     public function store(Request $request)
     {
-        $idSend = $request->input("idUserSen");
+        $idSend =  Auth::id();
         $idRecep = $request->input("idUserRec");
         $idAction = $request->input("listActions");
 
@@ -153,18 +148,14 @@ class StudentsController extends Controller
         //
     }
 
-    public function getSelectActions()
+    public function selectActions()
     {
         $role = Auth::user()->roles->first()->role;
 
         $actions = Action::where('status', '!=', 0)->where('type', $role)
             ->get();
 
-        $html = '<option value="0">Seleccione una Accion</option>';
-        foreach ($actions as $action) {
-            $html .= '<option value="' . $action->id . '" data-points="' . $action->points . '">' . $action->name . '</option>';
-        }
-
-        return $html;
+    
+        return response()->json($actions);
     }
 }
