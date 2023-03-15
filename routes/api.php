@@ -30,6 +30,8 @@ Route::middleware('jwt.auth', 'jwt.unauthorized')->group(function () {
         return auth()->user();
     });
     Route::post('/putUser', [AuthController::class, 'update']);
+	/* Menu del Dashboard*/
+	Route::get('/navbar', [AuthController::class,'navDashboard']);
     /* CardsPanel de Login */
     Route::get("/cardPanel", [AuthController::class, 'cardPanel']);
 
@@ -41,22 +43,22 @@ Route::middleware('jwt.auth', 'jwt.unauthorized')->group(function () {
     /* Modulo Alumno - Funciones : Catalogo de productos (canjear y eliminar) */
     Route::middleware('role:' . env('ROLALU'))->group(function () {
         /* Modulo Puntaje Alumnos*/
-        Route::get('/points/alumns', [StudentController::class, 'index']);
+        Route::get('/students/points/alumns', [StudentController::class, 'index']);
         /* Modulo Catalogo */
-        Route::get('/catalog', [ProductController::class, 'indexCat']);
-        Route::get('/catalog-alumn', [ProductController::class, 'indexCatAlum']);
-        Route::post('/catalog/setPurchase/{id}', [ProductController::class, 'store']);
-        Route::delete('/catalog/deletePurchase/{id}', [ProductController::class, 'destroy']);
+        Route::get('/student/catalog', [ProductController::class, 'indexCat']);
+        Route::get('/student/catalog-alumn', [ProductController::class, 'indexCatAlum']);
+        Route::post('/student/catalog/setPurchase/{id}', [ProductController::class, 'store']);
+        Route::delete('/student/catalog/deletePurchase/{id}', [ProductController::class, 'destroy']);
 
         /* Modulo Notificaciones */
-        Route::get('/notifications', [NotificationController::class, 'index']);
-        Route::post('/notifications/response',[NotificationController::class, 'store']);
+        Route::get('/student/notifications', [NotificationController::class, 'index']);
+        Route::post('/student/notifications/response',[NotificationController::class, 'store']);
     });
 
     /* Modulo Profesor - Funciones : Alumnos, Catalogo-Alumnos */
     Route::middleware('role:' . env('ROLPROFE'))->group(function () {
-        Route::get('/alumns', [TeacherController::class, 'index']);
-        Route::get('/catalog-college', [ProductController::class, 'indexCatCollege']);
+        Route::get('/teacher/alumns', [TeacherController::class, 'index']);
+        Route::get('/teacher/catalog-college', [ProductController::class, 'indexCatCollege']);
     });
 });
 

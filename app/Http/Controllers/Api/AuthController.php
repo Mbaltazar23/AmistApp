@@ -86,6 +86,47 @@ class AuthController extends Controller
             return response()->json(['status' => false, 'msg' => 'No se encontro al Usuario']);
         }
     }
+	
+	
+    public function navDashboard()
+    {
+        $navAdmin = "";
+        foreach (Auth::user()->roles as $role) {
+          if ($role->role == env("ROLALU")) {
+                $navAdmin = array(
+                    "Educacion" => array(
+                        "icon" => "fas fa-regular fa-school",
+                        "submodulos" => array(
+                            "Compañeros" => array("pagina" => "compañeros"),
+                        ),
+                    ),
+                    "Catalogo" => array(
+                        "icon" => "fas fa-solid fa-store",
+                        "submodulos" => array(
+                            "Productos" => array("pagina" => "catalogo"),
+                            "Mis Productos" => array("pagina" => "productos-adquiridos"),
+                        ),
+                    ),
+                );
+            } else if ($role->role == env("ROLPROFE")) {
+                $navAdmin = array(
+                    "Educacion" => array(
+                        "icon" => "fas fa-regular fa-school",
+                        "submodulos" => array(
+                            "Alumnos" => array("pagina" => "alumnos-curso"),
+                        ),
+                    ),
+                    "Catalogo" => array(
+                        "icon" => "fas fa-solid fa-store",
+                        "submodulos" => array(
+                            "Productos" => array("pagina" => "catalogo-alumns"),
+                        ),
+                    ),
+                );
+            }
+        }
+        return $navAdmin;
+    }
 
     public function cardPanel()
     {
