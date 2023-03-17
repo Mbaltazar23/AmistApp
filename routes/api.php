@@ -23,6 +23,8 @@ Route::fallback(function () {
 });
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/reset', [AuthController::class, 'getEmail']);
+Route::post('/resetPassword', [AuthController::class, 'resetPassword']);
 
 Route::middleware('jwt.auth', 'jwt.unauthorized')->group(function () {
     /* Modulo Usuario (obtener sus datos y actualizarlos) */
@@ -30,8 +32,8 @@ Route::middleware('jwt.auth', 'jwt.unauthorized')->group(function () {
         return auth()->user();
     });
     Route::post('/putUser', [AuthController::class, 'update']);
-	/* Menu del Dashboard*/
-	Route::get('/navbar', [AuthController::class,'navDashboard']);
+    /* Menu del Dashboard*/
+    Route::get('/navbar', [AuthController::class, 'navDashboard']);
     /* CardsPanel de Login */
     Route::get("/cardPanel", [AuthController::class, 'cardPanel']);
 
@@ -52,7 +54,7 @@ Route::middleware('jwt.auth', 'jwt.unauthorized')->group(function () {
 
         /* Modulo Notificaciones */
         Route::get('/student/notifications', [NotificationController::class, 'index']);
-        Route::post('/student/notifications/response',[NotificationController::class, 'store']);
+        Route::post('/student/notifications/response', [NotificationController::class, 'store']);
     });
 
     /* Modulo Profesor - Funciones : Alumnos, Catalogo-Alumnos */

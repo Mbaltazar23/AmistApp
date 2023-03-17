@@ -46,6 +46,71 @@ class AuthController extends Controller
 
     }
 
+    public function getEmail(Request $request)
+    {
+        $email = ucfirst($request->input('email'));
+
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            return response()->json([
+                'status' => true,
+                'email' => $email,
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'msg' => 'El Email encontrado no existe !!',
+            ]);
+        }
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $email = $request->input('email');
+
+        // Verifica que el email esté en sesión
+        if (!$email) {
+            return response()->json([
+                'status' => false,
+                'msg' => "El Email no se encuentra o no existe !!",
+            ]);
+        }
+
+        // Busca al usuario por el email en sesión
+        $user = User::with('roles')->where('email', $email)->first();
+
+        if ($user) {
+            // Actualiza la contraseña
+            $password = bcrypt($request->input('txtPassword01'));
+            $user->password = $password;
+            $user->save();
+
+            // Genera un nuevo token JWT
+            $token = JWTAuth::fromUser($user);
+
+            $user = User::with('roles')->where('dni', $user->dni)->first();
+
+            $college = College::whereHas('usersCollege', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->first();
+
+            // Anida el colegio al usuario
+            $user->college = $college ? $college : "";
+
+            return response()->json([
+                'status' => true,
+                'token' => $token,
+                'userData' => $user,
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Usuario no encontrado',
+            ]);
+        }
+    }
+
     public function logout()
     {
         JWTAuth::invalidate(JWTAuth::getToken());
@@ -86,13 +151,12 @@ class AuthController extends Controller
             return response()->json(['status' => false, 'msg' => 'No se encontro al Usuario']);
         }
     }
-	
-	
+
     public function navDashboard()
     {
         $navAdmin = "";
         foreach (Auth::user()->roles as $role) {
-          if ($role->role == env("ROLALU")) {
+            if ($role->role == env("ROLALU")) {
                 $navAdmin = array(
                     "Educacion" => array(
                         "icon" => "fas fa-regular fa-school",
