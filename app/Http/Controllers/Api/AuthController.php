@@ -21,10 +21,10 @@ class AuthController extends Controller
         $credentials = $request->only('dni', 'password');
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json(['error' => 'Credenciales inválidas'], 401);
+                return response()->json(['status' => false, 'msg' => 'El Dni o password no estan registrados..'], 401);
             }
         } catch (JWTException $e) {
-            return response()->json(['error' => 'No se pudo crear el token'], 500);
+            return response()->json(['status' => false,'msg' => 'No se pudo crear el token'], 500);
         }
 
         $user = Auth::user();
@@ -40,8 +40,8 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'success' => true,
-            'userData' => $user,
+            'status' => true,
+            'data' => $user,
         ]);
 
     }
@@ -55,7 +55,7 @@ class AuthController extends Controller
         if ($user) {
             return response()->json([
                 'status' => true,
-                'email' => $email,
+                'data' => $email,
             ]);
         } else {
             return response()->json([
@@ -82,7 +82,7 @@ class AuthController extends Controller
 
         if ($user) {
             // Actualiza la contraseña
-            $password = bcrypt($request->input('txtPassword01'));
+            $password = bcrypt($request->input('password01'));
             $user->password = $password;
             $user->save();
 
@@ -101,7 +101,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => true,
                 'token' => $token,
-                'userData' => $user,
+                'data' => $user,
             ]);
         } else {
             return response()->json([
