@@ -67,7 +67,7 @@ class AuthController extends Controller
 
     public function resetPassword(Request $request)
     {
-        $email = $request->input('email');
+        $email = ucfirst($request->input('email'));
 
         // Verifica que el email esté en sesión
         if (!$email) {
@@ -106,7 +106,7 @@ class AuthController extends Controller
         } else {
             return response()->json([
                 'status' => false,
-                'message' => 'Usuario no encontrado',
+                'msg' => 'Usuario no encontrado',
             ]);
         }
     }
