@@ -46,7 +46,7 @@
                                     <thead>
                                         <tr>
                                             <th>Nro</th>
-                                            <th>Nombre</th>
+                                            <th>Categoria</th>
                                             <th>Fecha</th>
                                             <th>Hora</th>
                                             <th>Status</th>

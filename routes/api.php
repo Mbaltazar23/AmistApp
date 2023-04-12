@@ -26,7 +26,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/reset', [AuthController::class, 'getEmail']);
 Route::post('/resetPassword', [AuthController::class, 'resetPassword']);
 
-Route::middleware('jwt.auth', 'jwt.unauthorized')->group(function () {
+Route::middleware('auth.api')->group(function () {
     /* Modulo Usuario (obtener sus datos y actualizarlos) */
     Route::get('/user', function () {
         return auth()->user();
@@ -36,32 +36,34 @@ Route::middleware('jwt.auth', 'jwt.unauthorized')->group(function () {
     Route::get('/navbar', [AuthController::class, 'navDashboard']);
     /* CardsPanel de Login */
     Route::get("/cardPanel", [AuthController::class, 'cardPanel']);
+});
 
+Route::middleware('role:' . env("ROLPROFE") . ',' . env("ROLALU"))->group(function () {
     /* Modulos para Profesor/Alumno - Puntaje a dar */
     Route::get('/points/getAlumn/{id}', [StudentController::class, 'show']);
     Route::get('/select/actions', [StudentController::class, 'selectActions']);
     Route::post('/points/setPointAction', [StudentController::class, 'store']);
+});
 
-    /* Modulo Alumno - Funciones : Catalogo de productos (canjear y eliminar) */
-    Route::middleware('role:' . env('ROLALU'))->group(function () {
-        /* Modulo Puntaje Alumnos*/
-        Route::get('/students/points/alumns', [StudentController::class, 'index']);
-        /* Modulo Catalogo */
-        Route::get('/student/catalog', [ProductController::class, 'indexCat']);
-        Route::get('/student/catalog-alumn', [ProductController::class, 'indexCatAlum']);
-        Route::post('/student/catalog/setPurchase/{id}', [ProductController::class, 'store']);
-        Route::delete('/student/catalog/deletePurchase/{id}', [ProductController::class, 'destroy']);
+/* Modulo Alumno - Funciones : Catalogo de productos (canjear y eliminar) */
+Route::middleware('role:' . env("ROLALU"))->group(function () {
+    /* Modulo Puntaje Alumnos*/
+    Route::get('/students/points/alumns', [StudentController::class, 'index']);
+    /* Modulo Catalogo */
+    Route::get('/student/catalog/cats', [ProductController::class, 'index']);
+    Route::get('/student/catalog/cats/{idCat}', [ProductController::class, 'indexCat']);
+    Route::get('/student/catalog-alumn', [ProductController::class, 'indexCatAlum']);
+    Route::post('/student/catalog/setPurchase/{id}', [ProductController::class, 'store']);
+    Route::delete('/student/catalog/deletePurchase/{id}', [ProductController::class, 'destroy']);
+    /* Modulo Notificaciones */
+    Route::get('/student/notifications', [NotificationController::class, 'index']);
+    Route::post('/student/notifications/response', [NotificationController::class, 'store']);
+});
 
-        /* Modulo Notificaciones */
-        Route::get('/student/notifications', [NotificationController::class, 'index']);
-        Route::post('/student/notifications/response', [NotificationController::class, 'store']);
-    });
-
+Route::middleware('role:' . env("ROLPROFE"))->group(function () {
     /* Modulo Profesor - Funciones : Alumnos, Catalogo-Alumnos */
-    Route::middleware('role:' . env('ROLPROFE'))->group(function () {
-        Route::get('/teacher/alumns', [TeacherController::class, 'index']);
-        Route::get('/teacher/catalog-college', [ProductController::class, 'indexCatCollege']);
-    });
+    Route::get('/teacher/alumns', [TeacherController::class, 'index']);
+    Route::get('/teacher/catalog-college', [ProductController::class, 'indexCatCollege']);
 });
 
 Route::middleware('jwt.refresh')->post('logout', [AuthController::class, 'logout']);

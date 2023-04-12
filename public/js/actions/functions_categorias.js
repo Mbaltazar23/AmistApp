@@ -11,7 +11,7 @@ document.addEventListener(
             },
             columns: [
                 { data: "nro" },
-                { data: "name" },
+                { data: "nameC" },
                 { data: "fecha" },
                 { data: "hora" },
                 { data: "status" },
@@ -44,41 +44,116 @@ document.addEventListener(
         });
 
         //NUEVA CATEGORIA
-        let formCategoria = document.querySelector("#formCategoria");
-        formCategoria.onsubmit = function (e) {
-            e.preventDefault();
-            let strNombre = document.querySelector("#name").value;
-            if (strNombre == "") {
-                swal("Atención", "Debe ingresar un nombre..", "error");
-                return false;
-            } else {
-                let formData = new FormData(formCategoria);
-                axios
-                    .post("/categories/setCategory", formData)
-                    .then(function (response) {
-                        if (response.data.status) {
-                            $("#modalFormCategorias").modal("hide");
-                            formCategoria.reset();
-                            swal("Exito !!", response.data.msg, "success");
+        if (document.querySelector("#formCategoria")) {
+            let formCategoria = document.querySelector("#formCategoria");
+            formCategoria.onsubmit = function (e) {
+                e.preventDefault();
+                let strNombre = document.querySelector("#name").value;
+                if (strNombre == "") {
+                    swal("Atención", "Debe ingresar un nombre..", "error");
+                    return false;
+                } else {
+                    let formData = new FormData(formCategoria);
+                    axios
+                        .post("/categories/setCategory", formData)
+                        .then(function (response) {
+                            if (response.data.status) {
+                                $("#modalFormCategorias").modal("hide");
+                                formCategoria.reset();
+                                swal("Exito !!", response.data.msg, "success");
 
-                            tableCategorias.api().ajax.reload();
-                        } else {
-                            swal("Error", response.data.msg, "error");
+                                tableCategorias.api().ajax.reload();
+                            } else {
+                                swal("Error", response.data.msg, "error");
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                            swal(
+                                "Error",
+                                "Ocurrió un error al procesar la petición",
+                                "error"
+                            );
+                        });
+                }
+            };
+        }
+
+        if (document.querySelector("#image")) {
+            let foto = document.querySelector("#image");
+            foto.onchange = function (e) {
+                let uploadFoto = document.querySelector("#image").value;
+                let fileimg = document.querySelector("#image").files;
+                let nav = window.URL || window.webkitURL;
+                let contactAlert = document.querySelector("#form_alert");
+                if (uploadFoto != "") {
+                    let type = fileimg[0].type;
+                    let name = fileimg[0].name;
+                    if (
+                        type != "image/jpeg" &&
+                        type != "image/jpg" &&
+                        type != "image/png"
+                    ) {
+                        contactAlert.innerHTML =
+                            '<p class="errorArchivo">El archivo no es válido.</p>';
+                        if (document.querySelector("#img")) {
+                            document.querySelector("#img").remove();
                         }
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                        swal(
-                            "Error",
-                            "Ocurrió un error al procesar la petición",
-                            "error"
-                        );
-                    });
-            }
-        };
+                        document
+                            .querySelector(".delPhoto")
+                            .classList.add("notBlock");
+                        foto.value = "";
+                        return false;
+                    } else {
+                        contactAlert.innerHTML = "";
+                        if (document.querySelector("#img")) {
+                            document.querySelector("#img").remove();
+                        }
+                        document
+                            .querySelector(".delPhoto")
+                            .classList.remove("notBlock");
+                        let objeto_url = nav.createObjectURL(this.files[0]);
+                        document.querySelector(".prevPhoto div").innerHTML =
+                            "<img id='img' src=" + objeto_url + ">";
+                    }
+                } else {
+                    swal("Error !!", "No selecciono una foto", "error");
+                    if (document.querySelector("#img")) {
+                        document.querySelector("#img").remove();
+                    }
+                }
+            };
+        }
+
+        if (document.querySelector(".delPhoto")) {
+            let delPhoto = document.querySelector(".delPhoto");
+            delPhoto.onclick = function (e) {
+                e.preventDefault();
+                swal({
+                    title: "Borrar Imagen",
+                    text: "¿Realmente quiere borrar esta imagen de este producto?",
+                    icon: "warning",
+                    dangerMode: true,
+                    buttons: true,
+                }).then((isClosed) => {
+                    if (isClosed) {
+                        document.querySelector("#foto_remove").value = 1;
+                        removePhoto();
+                    }
+                });
+            };
+        }
     },
     false
 );
+
+function removePhoto() {
+    document.querySelector("#foto").value = "";
+    document.querySelector(".delPhoto").classList.add("notBlock");
+    if (document.querySelector("#img")) {
+        document.querySelector("#img").remove();
+    }
+}
 
 function fntViewInfo(nro, idcategoria) {
     axios
@@ -97,6 +172,10 @@ function fntViewInfo(nro, idcategoria) {
                     response.data.data.fecha;
                 document.querySelector("#celHora").innerHTML =
                     response.data.data.hora;
+                document.querySelector("#celFoto").innerHTML =
+                    '<img src="' +
+                    response.data.data.url_image +
+                    '" width="120" height="100"/>';
                 $("#modalViewCategoria").modal("show");
             } else {
                 swal("Error", response.data.msg, "error");
@@ -124,6 +203,24 @@ function fntEditInfo(element, idcategoria) {
                     response.data.data.nombre
                 ).toLowerCase();
 
+                document.querySelector("#foto_actual").value =
+                    response.data.data.image;
+                document.querySelector("#foto_remove").value = 0;
+
+                const imgContainer = document.querySelector(".prevPhoto div");
+                if (imgContainer) {
+                    imgContainer.innerHTML = `<img id="img" src="${response.data.data.url_image}"/>`;
+                }
+
+                if (response.data.data.image == "portada_categoria.png") {
+                    document
+                        .querySelector(".delPhoto")
+                        .classList.add("notBlock");
+                } else {
+                    document
+                        .querySelector(".delPhoto")
+                        .classList.remove("notBlock");
+                }
                 $("#modalFormCategorias").modal("show");
             } else {
                 swal("Error", response.msg, "error");
@@ -200,6 +297,8 @@ function openModal() {
     document.querySelector("#btnText").innerHTML = "Guardar";
     document.querySelector("#titleModal").innerHTML = "Nueva Categoría";
     document.querySelector("#formCategoria").reset();
+    document.querySelector("#img").src =
+        "images/categories/portada_categoria.png";
     $("#modalFormCategorias").modal("show");
 }
 

@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-
     public function index()
     {
         $data = [
@@ -23,7 +22,6 @@ class ProductController extends Controller
 
     public function getProducts()
     {
-
         $products = Product::with('category')->get();
         $data = [];
 
@@ -79,6 +77,7 @@ class ProductController extends Controller
         if ($nombre_foto != '') {
             $imgPortada = 'prod_' . md5(date('d-m-Y H:i:s')) . '.jpg';
         }
+        
         if ($id) {
             $product = Product::find($id);
             // actualizar producto

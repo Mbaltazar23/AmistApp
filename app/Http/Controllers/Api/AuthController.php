@@ -31,15 +31,28 @@ class AuthController extends Controller
 
         $user = User::with('roles')->where('dni', $user->dni)->first();
 
+        foreach ($user->roles as $role) {
+			if ($role->role == env("ROLPROFE")) {
+                $imgPerfil = asset('images/avatar4.png');
+            } else {
+                $imgPerfil = asset('images/avatarAlum.jpg');
+            }
+        }
+
         $college = College::whereHas('usersCollege', function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })->first();
 
         // Anida el colegio al usuario
         $user->college = $college ? $college : "";
+		
+		//Anidamos la imagen del perfil de user
+		$user->image = $imgPerfil;
+		
+		//Guardammos el token en el user
+		$user->token = $token;
 
         return response()->json([
-            'token' => $token,
             'status' => true,
             'data' => $user,
         ]);
@@ -91,6 +104,14 @@ class AuthController extends Controller
 
             $user = User::with('roles')->where('dni', $user->dni)->first();
 
+            foreach ($user->roles as $role) {
+			   if ($role->role == env("ROLPROFE")) {
+                  $imgPerfil = asset('images/avatar4.png');
+               } else {
+                  $imgPerfil = asset('images/avatarAlum.jpg');
+               }
+            }
+
             $college = College::whereHas('usersCollege', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->first();
@@ -98,9 +119,14 @@ class AuthController extends Controller
             // Anida el colegio al usuario
             $user->college = $college ? $college : "";
 
+            // Anidamos la imagen del perfil de user
+		    $user->image = $imgPerfil;
+			
+			//Guardammos el token en el user
+		    $user->token = $token;
+		 
             return response()->json([
                 'status' => true,
-                'token' => $token,
                 'data' => $user,
             ]);
         } else {
@@ -122,13 +148,12 @@ class AuthController extends Controller
 
     public function update(Request $request)
     {
-        $id = Auth::user()->id;
-        $dni = $request->input('txtRut');
-        $name = ucwords($request->input('txtNombre'));
-        $email = $request->input('txtEmail');
-        $phone = $request->input('txtTelefono');
-        $address = ucfirst($request->input('txtDireccion'));
-        $password = $request->input('txtPassword');
+        $id = $request->input('id');
+        $dni = $request->input('dni');
+        $name = ucwords($request->input('name'));
+        $email = $request->input('email');
+        $phone = $request->input('phone');
+        $address = ucfirst($request->input('address'));
 
         $user = User::find($id);
 
@@ -142,11 +167,39 @@ class AuthController extends Controller
             } else {
                 $user->address = $address;
             }
-            if (!empty($password)) {
-                $user->password = bcrypt($password);
-            }
+      
             $user->save();
-            return response()->json(['status' => true, 'msg' => 'Datos Actualizados Exitosamente !!', 'data' => $user]);
+			
+			 // Genera un nuevo token JWT
+            $token = JWTAuth::fromUser($user);
+
+            $user = User::with('roles')->where('dni', $user->dni)->first();
+
+            foreach ($user->roles as $role) {
+			   if ($role->role == env("ROLPROFE")) {
+                  $imgPerfil = asset('images/avatar4.png');
+               } else {
+                  $imgPerfil = asset('images/avatarAlum.jpg');
+               }
+            }
+
+            $college = College::whereHas('usersCollege', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->first();
+
+            // Anida el colegio al usuario
+            $user->college = $college ? $college : "";
+
+            // Anidamos la imagen del perfil de user
+		    $user->image = $imgPerfil;
+			
+			//Guardammos el token en el user
+		    $user->token = $token;
+			
+            return response()->json([
+			       'status' => true, 
+				   'msg' => 'Datos Actualizados Exitosamente !!',
+				   'data' => $user]);
         } else {
             return response()->json(['status' => false, 'msg' => 'No se encontro al Usuario']);
         }

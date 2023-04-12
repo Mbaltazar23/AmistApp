@@ -2,19 +2,30 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
 use App\Models\UserRoles;
+use Closure;
 use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class RoleMiddleware
 {
     public function handle($request, Closure $next, ...$roles)
     {
-        $user = Auth::user();
+        $token = $request->header('Authorization');
 
-        if (!$user) {
-            return response()->json(['error' => 'No autorizado'], 401);
+        if (!$token) {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
+
+        try {
+            JWTAuth::setToken($token);
+            $user = JWTAuth::toUser();
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Unauthorized x2'], 401);
+        }
+
+        Auth::login($user);
 
         $userRoles = UserRoles::where('user_id', $user->id)->first();
 
@@ -23,7 +34,7 @@ class RoleMiddleware
                 return $next($request);
             }
         }
-        return response()->json(['error' => 'No autorizado'], 401);
-    }
 
+        return response()->json(['error' => 'Unauthorized x3'], 401);
+    }
 }

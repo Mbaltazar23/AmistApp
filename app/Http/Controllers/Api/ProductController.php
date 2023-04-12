@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -17,24 +19,43 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function indexCat()
+
+     public function index()
     {
-        $products = Product::with('category')->where('status', '!=', 0)->get();
+        $categories = Category::where('status', '!=', 0)
+            ->has('products')
+            ->get();
+            
+        $formattedCategories = [];    
+
+        foreach ($categories as $category) {
+            $formattedCategories[] = [
+                'id' => $category->id,
+                'name' => $category->name,
+                'image' => asset('images/categories/' . $category->image),
+                'created_at' => Carbon::parse($category->created_at)->format('d-m-Y')
+            ];
+        }
+        return response()->json($formattedCategories);
+    }
+
+    public function indexCat($category_id)
+    {
+        $products = Product::where('category_id', $category_id)->with('category')->where('status', '!=', 0)->get();
         $data = [];
 
-        foreach ($products as $product) {
+          foreach ($products as $product) {
             $data[] = [
                 'id' => $product->id,
-                'nameProduct' => ucfirst($product->name),
-                'imageProduct' => asset('images/products/' . $product->image),
+                'name' => ucfirst($product->name),
+                'image' => asset('images/products/' . $product->image),
                 'category' => $product->category->name,
                 'status' => $product->status,
                 'stock' => $product->stock,
-                'puntos' => $product->points,
+                'points' => $product->points,
             ];
             // ...
         }
-
         return response()->json($data);
     }
 

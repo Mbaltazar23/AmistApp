@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
 use App\Models\Product;
 use App\Models\Category;
-use Illuminate\Support\Str;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-
         $data = [
             'page_tag' => env("NOMBRE_WEB") . " - Categorias",
             'page_title' => 'Categorias',
@@ -24,7 +24,6 @@ class CategoryController extends Controller
 
     public function getCategories()
     {
-
         $categories = Category::all();
         $data = [];
         foreach ($categories as $key => $category) {
@@ -48,6 +47,9 @@ class CategoryController extends Controller
                 $btnEdit = '<button class="btn btn-secondary  btn-sm" onClick="fntEditInfo(this,' . $category->id . ')" title="Editar categoría" disabled><i class="fas fa-pencil-alt"></i></button>';
                 $btnDelete = '<button class="btn btn-dark btn-sm" onClick="fntActivateInfo(' . $category->id . ')" title="Activar categoría"><i class="fas fa-toggle-on"></i></button>';
             }
+
+            $row['nameC'] = "<img src='" . asset('images/categories/' . $category->image) . "' alt='" . $category->name . "' class='img-circle img-size-32 mr-2'>" . $category->name;
+
             $row['options'] = '<div class="text-center">' . $btnView . '  ' . $btnEdit . '  ' . $btnDelete . '</div>';
             $data[] = $row;
         }
@@ -63,11 +65,37 @@ class CategoryController extends Controller
         $id = $request->input('id');
         $name = ucwords($request->input('name'));
         $remember_token = Str::random(10);
+        $foto = $request->file('image');
+        $nombre_foto = "";
+
+        if ($foto && $foto->isValid()) {
+            $nombre_foto = $foto->getClientOriginalName();
+            // resto del código
+        }
+
+        $imgPortada = 'portada_categoria.png';
+
+        if ($nombre_foto != '') {
+            $imgPortada = 'ct_' . md5(date('d-m-Y H:i:s')) . '.jpg';
+        }
         if ($id) {
             // actualizar categoría
             $category = Category::find($id);
+
+            if ($nombre_foto == '') {
+                if ($request->input('foto_actual') != 'portada_categoria.png' && $request->input('foto_remove') == 0) {
+                    $imgPortada = $request->input('foto_actual');
+                }
+            }
             $category->name = $name;
+            $category->image = $imgPortada;
             $category->save();
+            if ($nombre_foto != '') {
+                $foto->move(public_path('images/categories'), $imgPortada);
+            }
+            if (($nombre_foto == '' && $request->input('foto_remove') == 1 && $request->input('foto_actual') != 'portada_categoria.png') || ($nombre_foto != '' && $request->input('foto_actual') != 'portada_categoria.png')) {
+                $this->deleteFile($request->input('foto_actual'), "categories");
+            }
             return response()->json(['status' => true, 'msg' => 'Categoría actualizada con éxito', 'data' => $category]);
         } else {
 
@@ -79,8 +107,12 @@ class CategoryController extends Controller
                 // insertar categoría
                 $category = new Category();
                 $category->name = $name;
+                $category->image = $imgPortada;
                 $category->remember_token = $remember_token;
                 $category->save();
+                if ($nombre_foto != '') {
+                    $foto->move(public_path('images/categories'), $imgPortada);
+                }
                 return response()->json(['status' => true, 'msg' => 'Categoría agregada con éxito', 'data' => $category]);
             }
         }
@@ -92,15 +124,26 @@ class CategoryController extends Controller
         $categoria = Category::find($id);
 
         if ($categoria) {
+            $data = [
+                'id' => $categoria->id,
+                'nombre' => $categoria->name,
+                'image' => $categoria->image,
+                'fecha' => $categoria->created_at->format('d-m-Y'),
+                'hora' => $categoria->created_at->format('H:i:s'),
+                'status' => $categoria->status,
+            ];
+
+            if ($categoria->image && file_exists(public_path('images/categories/' . $categoria->image))) {
+                $data['image'] = $categoria->image;
+                $data['url_image'] = asset('images/categories/' . $categoria->image);
+            } else {
+                $data['image'] = null;
+                $data['url_image'] = null;
+            }
+
             return response()->json([
                 'status' => true,
-                'data' => [
-                    'id' => $categoria->id,
-                    'nombre' => $categoria->name,
-                    'fecha' => $categoria->created_at->format('d-m-Y'),
-                    'hora' => $categoria->created_at->format('H:i:s'),
-                    'status' => $categoria->status,
-                ],
+                'data' => $data,
                 'msg' => 'Categoría obtenida correctamente',
             ]);
         } else {
@@ -111,6 +154,12 @@ class CategoryController extends Controller
         }
     }
 
+    public function deleteFile(string $name, string $ruta): bool
+    {
+        $path = public_path('images/' . $ruta . '/' . $name);
+        return Storage::disk('public')->delete($path);
+    }
+
     public function setStatus($id, Request $request)
     {
         $status = $request->input('status');
@@ -118,8 +167,8 @@ class CategoryController extends Controller
 
         // Si la categoría está siendo desactivada (es decir, su status es 0), entonces verificamos si hay productos asociados a ella antes de desactivarla.
         if ($status == 0) {
-            $has_products = Product::where('category_id', $category->id)->exists();
-            if ($has_products) {
+            $has_categories = Product::where('category_id', $category->id)->exists();
+            if ($has_categories) {
                 return response()->json(['status' => false, 'msg' => 'Esta Categoria ya esta en uso']);
             }
         }

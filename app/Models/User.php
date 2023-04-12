@@ -13,7 +13,7 @@ class User extends Authenticatable implements JWTSubject
     protected $table = 'users';
 
     protected $fillable = [
-        'id', 'dni', 'name', 'email', 'phone', 'points', 'password', 'created_at', 'address', 'status',
+        'id', 'dni', 'name', 'email', 'phone', 'points', 'password', 'created_at', 'address', 'status','remember_token'
     ];
 
     public function getAuthIdentifierName()

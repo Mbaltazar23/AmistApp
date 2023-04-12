@@ -58,7 +58,7 @@ class Kernel extends HttpKernel
 	    'checkrole' => \App\Http\Middleware\CheckRole::class,
         'clearcache' => \App\Http\Middleware\ClearViewCacheMiddleware::class,
         'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
-        'jwt.unauthorized' => \App\Http\Middleware\UnauthorizedMiddleware::class,
+        'auth.api' => \App\Http\Middleware\UnauthorizedMiddleware::class,
         'role' => \App\Http\Middleware\RoleMiddleware::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
