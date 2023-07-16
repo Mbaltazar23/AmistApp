@@ -33,6 +33,10 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="control-label">Contraseña</label>
+                        <input class="form-control" id="txtPassword" name="txtPassword" type="password">
+                    </div>
+                    <div class="form-group">
                         <label class="control-label">Direccion</label>
                         <textarea class="form-control" id="txtDireccion" name="txtDireccion" rows="2"></textarea>
                     </div>
@@ -47,6 +51,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Modal -->
 <div class="modal fade" id="modalViewAdmin" tabindex="-1" role="dialog" aria-hidden="true">

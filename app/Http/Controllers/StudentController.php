@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\College;
 use App\Models\CollegeUser;
 use App\Models\Course;
 use App\Models\Student;
@@ -25,6 +26,17 @@ class StudentController extends Controller
         return view('students.index', compact('data'));
     }
 
+    public function allStudents()
+    {
+        $data = [
+            'page_tag' => env("NOMBRE_WEB") . " - Alumnos",
+            'page_title' => 'Alumnos',
+            'page_functions_js' => 'functions_all_alumns.js',
+        ];
+
+        return view('students.students_all', compact('data'));
+    }
+
     public function getStudents()
     {
         $college_id = Auth::user()->colleges->first()->college_id;
@@ -43,6 +55,7 @@ class StudentController extends Controller
             $btnView = '';
             $btnEdit = '';
             $btnDelete = '';
+            $btnAllDelete = '';
             foreach ($user->students as $student) {
                 $row = [
                     'dni' => $user->dni,
@@ -55,14 +68,52 @@ class StudentController extends Controller
                     $row['status'] = '<span class="badge badge-success">Activo</span>';
                     $btnView = '<button class="btn btn-info btn-sm" onClick="fntViewInfo(' . $user->id . ')" title="Ver Alumno"><i class="far fa-eye"></i></button>';
                     $btnEdit = '<button class="btn btn-primary  btn-sm" onClick="fntEditInfo(this,' . $user->id . ')" title="Editar Alumno"><i class="fas fa-pencil-alt"></i></button>';
-                    $btnDelete = '<button class="btn btn-danger btn-sm" onClick="fntDelInfo(' . $user->id . ')" title="Eliminar Alumno"><i class="far fa-trash-alt"></i></button>';
+                    $btnDelete = '<button class="btn btn-danger btn-sm" onClick="fntDelInfo(' . $user->id . ')" title="Inhabilitar Alumno"><i class="far fa-trash-alt"></i></button>';
+                    $btnAllDelete = '<button class="btn btn-secondary btn-sm" onClick="fntDelAll(' . $user->id . ')" title="Eliminar Alumno" disabled><i class="far fa-trash-alt"></i></button>';
                 } else {
                     $row['status'] = '<span class="badge badge-danger">Inactivo</span>';
                     $btnView = '<button class="btn btn-secondary btn-sm" onClick="fntViewInfo(' . $user->id . ')" title="Ver Alumno" disabled><i class="far fa-eye"></i></button>';
                     $btnEdit = '<button class="btn btn-secondary  btn-sm" onClick="fntEditInfo(this,' . $user->id . ')" title="Editar Alumno" disabled><i class="fas fa-pencil-alt"></i></button>';
                     $btnDelete = '<button class="btn btn-dark btn-sm" onClick="fntActivateInfo(' . $user->id . ')" title="Activar Alumno"><i class="fas fa-toggle-on"></i></button>';
+                    $btnAllDelete = '<button class="btn btn-dark btn-sm" onClick="fntDelAll(' . $user->id . ')" title="Eliminar Alumno"><i class="far fa-trash-alt"></i></button>';
                 }
-                $row['options'] = '<div class="text-center">' . $btnView . ' ' . $btnEdit . ' ' . $btnDelete . '</div>';
+                $row['options'] = '<div class="text-center">' . $btnView . ' ' . $btnEdit . ' ' . $btnDelete .' '.$btnAllDelete. '</div>';
+                $data[] = $row;
+            }
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $data,
+        ]);
+    }
+
+    public function getAllStudents()
+    {
+        $students = User::with('students.course', 'colleges.college')->whereHas('students')->get();
+
+        $data = [];
+        foreach ($students as $key => $user) {
+            $btnChangePassword = '';
+            $btnDisableAccount = '';
+            foreach ($user->students as $student) {
+                $collegeName = $student->course->college->name;
+                $row = [
+                    'dni' => $user->dni,
+                    'alumno' => '<strong>Nombres:</strong> ' . $user->name . '<br><strong>Email:</strong> ' . $user->email . '<br><strong>Teléfono:</strong> ' . $user->phone,
+                    'curso' => $student->course->name . ' ' . $student->course->section,
+                    'colegio' => $collegeName,
+                ];
+                if ($user->status == 1) {
+                    $row['status'] = '<span class="badge badge-success">Activo</span>';
+                    $btnChangePassword = '<button class="btn btn-primary btn-sm" onClick="fntChangePassword(' . $user->id . ')" title="Cambiar Contraseña"><i class="fas fa-key"></i></button>';
+                    $btnDisableAccount = '<button class="btn btn-danger btn-sm" onClick="fntDisableAccount(' . $user->id . ')" title="Ocultar/Inhabilitar Cuenta"><i class="fas fa-user-times"></i></button>';
+                } else {
+                    $row['status'] = '<span class="badge badge-danger">Inactivo</span>';
+                    $btnChangePassword = '<button class="btn btn-secondary btn-sm" onClick="fntChangePassword(' . $user->id . ')" title="Cambiar Contraseña" disabled><i class="fas fa-key"></i></button>';
+                    $btnDisableAccount = '<button class="btn btn-secondary btn-sm" onClick="fntEnableAccount(' . $user->id . ')" title="Mostrar/Habilitar Cuenta"><i class="fas fa-user-check"></i></button>';
+                }
+                $row['options'] = '<div class="text-center">' . $btnChangePassword . ' ' . $btnDisableAccount . '</div>';
                 $data[] = $row;
             }
         }
@@ -82,6 +133,7 @@ class StudentController extends Controller
         $course = $request->input('listCurso');
         $phone = $request->input('txtTelefono');
         $address = $request->input('txtDireccion');
+        $points = $request->input("txtPuntajeInicial") ?? 100;
         $password = bcrypt("AmistApp.");
         $rol = env('ROLALU');
         $college_id = Auth::user()->colleges->first()->college_id;
@@ -99,7 +151,7 @@ class StudentController extends Controller
             $user->name = $name;
             $user->email = $email;
             $user->phone = $phone;
-            $user->points = 100;
+            $user->points = $points;
             if (!$address) {
                 $user->address = '';
             } else {
@@ -128,6 +180,7 @@ class StudentController extends Controller
                 $collegeUser->college_id = $college_id;
                 $collegeUser->user_id = $user->id;
                 $collegeUser->save();
+                $user->colleges()->save($collegeUser);
 
                 return response()->json(['status' => true, 'msg' => 'Alumno registrado Exitosamente !!', 'data' => $user]);
             } else {
@@ -143,6 +196,7 @@ class StudentController extends Controller
             $user->name = $name;
             $user->email = $email;
             $user->phone = $phone;
+            $user->points = $points;
             if (!$address) {
                 $user->address = '';
             } else {
@@ -176,6 +230,88 @@ class StudentController extends Controller
         }
     }
 
+    public function setStudents(Request $request)
+    {
+        $rol = env('ROLALU');
+        $college_id = Auth::user()->colleges->first()->college_id;
+        $listCursos = $request->input('listCursos');
+        $users = $request->input('users');
+
+        // Validar y procesar los datos del arreglo de usuarios
+        $numUsers = 0; // Contador de usuarios nuevos
+        foreach ($users as $user) {
+            $dni = $user['dni'];
+            $existingUser = User::where('dni', $dni)->first();
+
+            if ($existingUser) {
+                continue; // Si el usuario ya existe, pasamos al siguiente
+            }
+
+            // Crear un nuevo usuario y asignar los datos
+            $newUser = new User();
+            $newUser->dni = $dni;
+            $newUser->name = ucwords($user['nombre']);
+            $newUser->email = ucfirst($user['email']);
+            $newUser->phone = "+56".$user['telefono'];
+            $newUser->address = $user['direccion'] ?? '';
+            $newUser->password = bcrypt($user['password']) ??  bcrypt("AmistApp.");
+            $newUser->points = $user["puntos"] ?? 100;
+            $newUser->remember_token = Str::random(10);
+            $newUser->save();
+
+            //Asignar Rol 
+            $userRole = new UserRoles();
+            $userRole->role = $rol;
+            $userRole->remember_token = Str::random(10);
+            $newUser->roles()->save($userRole);
+
+            // Asignar al curso
+            $student = new Student();
+            $student->user_id = $newUser->id;
+            $student->course_id = $listCursos;
+            $student->save();
+
+            // Asignar el colegio al usuario
+            $collegeUser = new CollegeUser();
+            $collegeUser->college_id = $college_id;
+            $collegeUser->user_id = $newUser->id;
+            $collegeUser->save();
+            $newUser->colleges()->save($collegeUser);
+
+            $numUsers++; // Incrementar el contador de usuarios nuevos
+        }
+
+        // Restar el número de usuarios nuevos al campo stock_alumns del modelo College
+        $college = College::find($college_id);
+        $college->stock_alumns -= $numUsers;
+        $college->save();
+
+        return response()->json(['status' => true, 'msg' => 'Datos guardados exitosamente']);
+    }
+
+    public function setPasswordStudent(Request $request)
+    {
+        $id = $request->input('idAlumn');
+        $password = $request->input('txtPassword01');
+
+        try {
+            $user = User::findOrFail($id);
+            $user->password = bcrypt($password);
+            $user->save();
+
+            return response()->json([
+                'status' => true,
+                'msg' => 'Contraseña actualizada exitosamente.',
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'msg' => 'Error al actualizar la contraseña.' . $e,
+            ]);
+        }
+    }
+
     public function getStudent($id)
     {
         $student = User::where('id', $id)
@@ -184,6 +320,7 @@ class StudentController extends Controller
             })
             ->with('students.course')
             ->first();
+
         if ($student) {
             return response()->json([
                 'status' => true,
@@ -194,6 +331,7 @@ class StudentController extends Controller
                     'correo' => $student->email,
                     'direccion' => $student->address,
                     'telefono' => $student->phone,
+                    "puntos" => $student->points,
                     'fecha' => $student->created_at->format('d-m-Y'),
                     'hora' => $student->created_at->format('H:i:s'),
                     'status' => $student->status,
@@ -218,14 +356,6 @@ class StudentController extends Controller
 
         if (!$student) {
             return response()->json(['status' => false, 'msg' => 'El Alumno no existe']);
-        }
-
-        if ($status == 0) {
-            $hasPointsActions = $student->pointsUserActions()->exists();
-            $hasPointsActionsSend = $student->pointsUserActionsSent()->exists();
-            if ($hasPointsActions || $hasPointsActionsSend) {
-                return response()->json(['status' => false, 'msg' => 'Este Alumno tiene su registro de puntaje en uso', 'data' => $student]);
-            }
         }
 
         $student->status = $status;
@@ -267,6 +397,48 @@ class StudentController extends Controller
                 ];
             }
         }
+        return response()->json([
+            'data' => $data,
+        ]);
+    }
+
+    public function deleteAlum($id)
+    {
+        $student = User::find($id);
+
+        if (!$student) {
+            return response()->json(['status' => false, 'msg' => 'El Alumno no existe']);
+        }
+
+        $student->delete();
+
+        return response()->json(['status' => true, 'msg' => 'Alumno Eliminado Exitosamente !!']);
+    }
+
+
+    public function getAllReport()
+    {
+        $students = User::with('students.course', 'colleges.college')->whereHas('students')->get();
+
+        $data = [];
+        foreach ($students as $key => $user) {
+            foreach ($user->students as $student) {
+                $collegeName = $student->course->college->name;
+                $alumno = [
+                    'Nombres' => $user->name,
+                    'Email' => $user->email,
+                    'Teléfono' => $user->phone,
+                ];
+                $data[] = [
+                    'dni' => $user->dni,
+                    'alumno' => $alumno,
+                    'curso' => $student->course->name . ' ' . $student->course->section,
+                    "status" => $user->status,
+                    'colegio' => $collegeName,
+                ];
+            }
+        }
+
         return response()->json([
             'data' => $data,
         ]);

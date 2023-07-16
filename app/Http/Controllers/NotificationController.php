@@ -361,15 +361,10 @@ class NotificationController extends Controller
         $status = $request->input('status');
         $notification = Notification::find($id);
 
-         // Verificar si la notificación está asociada a un usuario
-         $userNotification = UserNotification::where('notification_id', $notification->id)->first();
-         if ($userNotification) {
-             return response()->json(['status' => false, 'msg' => 'Esta Notificación ya está en uso']);
-         }
-
+        // Verificar si la notificación está asociada a un usuario
         if ($status == 1) {
             $notification->expiration_date = null;
-        } else  {
+        } else {
             $notification->expiration_date = Carbon::now()->addHours(72);
         }
 

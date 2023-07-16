@@ -81,6 +81,14 @@ Route::middleware(['auth', 'checkrole:' . env("ROLADMIN"), 'clearcache'])->group
     Route::post('/colleges/select', [CollegeController::class, 'getSelectColleges']);
     Route::post('/colleges/report', [CollegeController::class, 'getReport']);
 
+    /* Modulo Alumnos */
+    Route::get('/alumnos-all', [StudentController::class, 'allStudents']);
+    Route::get("/students-all", [StudentController::class, 'getAllStudents']);
+    Route::get("/students-all/select/{id}", [StudentController::class, 'getStudent']);
+    Route::post("/students-all/setPassword", [StudentController::class, 'setPasswordStudent']);
+    Route::post("/students-all/status/{id}", [StudentController::class, 'setStatus']);
+    Route::post("/students-all/report", [StudentController::class, 'getAllReport']);
+
     /* Modulo Notificaciones */
     Route::get('/notificaciones', [NotificationController::class, 'index']);
     Route::get('/notifications', [NotificationController::class, 'getNotifications']);
@@ -117,8 +125,10 @@ Route::middleware(['auth', 'checkrole:' . env("ROLADMINCOLE"), 'clearcache'])->g
     Route::get('/alumnos', [StudentController::class, 'index']);
     Route::get('/students', [StudentController::class, 'getStudents']);
     Route::post('/students/setStudent', [StudentController::class, 'setStudent']);
+    Route::post("/students/setStudents", [StudentController::class, 'setStudents']);
     Route::get('/students/getStudent/{id}', [StudentController::class, 'getStudent']);
     Route::post('/students/status/{id}', [StudentController::class, 'setStatus']);
+    Route::post("/students/delete/{id}", [StudentController::class, 'deleteAlum']);
     Route::post('/students/report', [StudentController::class, 'getReport']);
 
     /* Modulo Profesores */
@@ -127,6 +137,7 @@ Route::middleware(['auth', 'checkrole:' . env("ROLADMINCOLE"), 'clearcache'])->g
     Route::post('/teachers/setTeacher', [TeacherController::class, 'setTeacher']);
     Route::get('/teachers/getTeacher/{id}', [TeacherController::class, 'getTeacher']);
     Route::post('/teachers/status/{id}', [TeacherController::class, 'setStatus']);
+    Route::post("/teachers/delete/{id}", [TeacherController::class, 'deleteTeacher']);
     Route::post('/teachers/report', [TeacherController::class, 'getReport']);
 
     /*Modulo Catalogo*/

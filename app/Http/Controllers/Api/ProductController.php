@@ -20,20 +20,20 @@ class ProductController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     public function index()
+    public function index()
     {
         $categories = Category::where('status', '!=', 0)
             ->has('products')
             ->get();
-            
-        $formattedCategories = [];    
+
+        $formattedCategories = [];
 
         foreach ($categories as $category) {
             $formattedCategories[] = [
                 'id' => $category->id,
                 'name' => $category->name,
                 'image' => asset('images/categories/' . $category->image),
-                'created_at' => Carbon::parse($category->created_at)->format('d-m-Y')
+                'created_at' => Carbon::parse($category->created_at)->format('d-m-Y'),
             ];
         }
         return response()->json($formattedCategories);
@@ -44,7 +44,7 @@ class ProductController extends Controller
         $products = Product::where('category_id', $category_id)->with('category')->where('status', '!=', 0)->get();
         $data = [];
 
-          foreach ($products as $product) {
+        foreach ($products as $product) {
             $data[] = [
                 'id' => $product->id,
                 'name' => ucfirst($product->name),
@@ -82,13 +82,13 @@ class ProductController extends Controller
             $totalPoints = $uniquePurchases->sum('points');
             $data[] = [
                 'id' => $product->id,
-                'nameProduct' => ucfirst($product->name),
-                'urlImage' => asset('images/products/' . $product->image),
-                'categoria' => $product->category->name,
+                'name' => ucfirst($product->name),
+                'image' => asset('images/products/' . $product->image),
+                'category' => $product->category->name,
                 'status' => $product->status,
-                'puntos' => $product->points,
-                'total_canjeados' => $totalPurchases,
-                'total_puntos' => $totalPoints,
+                'points' => $product->points,
+                'stock' => $totalPurchases,
+                'total_points' => $totalPoints,
             ];
             // ...
         }
@@ -129,12 +129,12 @@ class ProductController extends Controller
 
                     $data[] = [
                         'id' => $product->id,
-                        'nameProduct' => ucfirst($product->name),
-                        'categoria' => $product->category->name,
-                        'puntos' => $product->points,
-                        'stock' => $totalPurchases,
-                        'total_puntos' => $totalPoints,
+                        'name' => ucfirst($product->name),
                         'image' => asset('images/products/' . $product->image),
+                        'category' => $product->category->name,
+                        'points' => $product->points,
+                        'stock' => $totalPurchases,
+                        'total_points' => $totalPoints,
                     ];
 
                 }
@@ -217,12 +217,11 @@ class ProductController extends Controller
 
             $data = [
                 'id' => $product->id,
-                'nombre' => $product->name,
-                'categoria' => $product->category->name,
-                'puntos' => $product->points,
+                'name' => $product->name,
+                'category' => $product->category->name,
+                'points' => $product->points,
                 'stock' => $product->stock,
-                'fecha' => $purchases->first()->created_at->format('d-m-Y'),
-                'hora' => $purchases->first()->created_at->format('H:i:s'),
+                'created_at' => $purchases->first()->created_at->format('d-m-Y') . ' ' . $purchases->first()->created_at->format('H:i:s'),
                 'status' => $product->status,
                 'points_initial' => $totalPoints,
                 'stock_ven' => $totalPurchases,

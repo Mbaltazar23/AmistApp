@@ -70,3 +70,25 @@
 .purchase-row02.show {
   display: table-row;
 }
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #337ab7 !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 3px 5px !important;
+    margin-top: 5px !important;
+    margin-right: 5px !important;
+  }
+  
+  .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: #fff !important;
+  }
+  
+  .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: #fff !important;
+  }
+
+  .selectCursos .select2-container {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }

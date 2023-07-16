@@ -14,7 +14,7 @@ class TeacherController extends Controller
     {
         $teacherId = Auth::id();
         $teacher = Teacher::where('user_id', $teacherId)->first();
-
+        $data = [];
         $students = Student::where('course_id', $teacher->course_id)
             ->whereHas('course', function ($query) use ($teacher) {
                 $query->where('college_id', $teacher->user->colleges->first()->college_id);
@@ -24,7 +24,18 @@ class TeacherController extends Controller
             })
             ->with('user')
             ->get();
-            
-        return response()->json($students);
+
+        foreach ($students as $key => $student) {
+            $data[] = [
+                'id' => $student->id,
+                'dni' => $student->user->dni,
+                'name' => $student->user->name,
+                'email' => $student->user->email,
+                'phone' => $student->user->phone,
+                'points' => $student->user->points,
+            ];
+        }
+        
+        return response()->json($data);
     }
 }

@@ -1,7 +1,7 @@
 <!-- /.content-wrapper -->
 <footer class="main-footer">
-    <strong>Copyright &copy; 2023 <a href="{{ route('dashboard.index') }}">{{env("NOMBRE_WEB")}}.</a><strong>
-    Todos los derechos reservados.
+    <strong>Copyright &copy; 2023 <a href="{{ route('dashboard.index') }}">{{ env('NOMBRE_WEB') }}.</a><strong>
+            Todos los derechos reservados.
 </footer>
 
 <!-- Control Sidebar -->
@@ -18,7 +18,7 @@
 <script src="{{ asset('js/plugins/jquery-ui/jquery-ui.min.js') }}"></script>
 <script src="{{ asset('js/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <!-- DataTables  & js/Plugins -->
-<script src="{{ asset('js/plugins/datatables/jquery.dataTables.js') }}" type="text/javascript"></script>
+<script src="{{ asset('js/plugins/datatables/jquery.dataTables.min.js') }}" type="text/javascript"></script>
 <script src="{{ asset('js/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
 <script src="{{ asset('js/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
 <script src="{{ asset('js/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
@@ -47,7 +47,14 @@
 <script src="{{ asset('js/plugins/daterangepicker/daterangepicker.js') }}"></script>
 <!-- Tempusdominus Bootstrap 4 -->
 <script src="{{ asset('js/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<!--URL para carga de datos y manipulacion de datos-->
+<script src="{{ asset('js/plugins/axios/axios.js') }}"></script>
+<!--Libreria para formatear texto-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/he/1.2.0/he.min.js"></script>
+<!---->
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<!---->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <!-- Summernote -->
 <script src="{{ asset('js/plugins/summernote/summernote-bs4.min.js') }}"></script>
 <!-- overlayScrollbars -->
@@ -56,5 +63,5 @@
 <script src="{{ asset('js/adminlte.js') }}"></script>
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="{{ asset('js/pages/dashboard.js') }}"></script>
-
+<!--Importacion de JS desde los controllers -->
 <script src="{{ asset('js/actions/' . $data['page_functions_js']) }}" type="text/javascript"></script>

@@ -40,13 +40,12 @@ class StudentController extends Controller
             $data[] = [
                 'id' => $student->id,
                 'dni' => $student->user->dni,
-                'nombre' => $student->user->name,
+                'name' => $student->user->name,
                 'email' => $student->user->email,
-                'telefono' => $student->user->phone,
-                'puntos' => $student->user->points,
+                'phone' => $student->user->phone,
+                'points' => $student->user->points,
             ];
 
-            
         }
         return response()->json($data);
     }
@@ -60,8 +59,8 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $idSend =  Auth::id();
-        $idRecep = $request->input("idUserRec");
-        $idAction = $request->input("listActions");
+        $idRecep = $request->input("id");
+        $idAction = $request->input("id_action");
 
         $action = Action::findOrFail($idAction);
         $points = $action->points;

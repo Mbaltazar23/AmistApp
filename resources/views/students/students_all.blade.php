@@ -1,6 +1,6 @@
 @extends('templates.base')
 @section('content')
-    @include('templates.modals.modalStudents')
+    @include('templates.modals.modalStudentPassword')
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <section class="content-header">
@@ -35,21 +35,19 @@
                                             {{ $data['page_title'] }}
                                         </button>
                                         <div class="dropdown-menu" role="menu">
-                                            <a class="dropdown-item" onclick="openModal();">Nuevo</a>
-                                            <a class="dropdown-item" onclick="openModalRegisters()">Registrar</a>
                                             <a class="dropdown-item" onclick="generarReporte();">Generar Reporte</a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="card-body">
-                                <table class="table table-striped table-responsive-lg" id="tableAlumns" style="width:100%">
+                                <table class="table table-striped table-responsive-lg" id="tableAlumnsAll"
+                                    style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>Rut</th>
-                                            <th>Nombre</th>
-                                            <th>Correo</th>
-                                            <th>Telefono</th>
+                                            <th>Alumno</th>
+                                            <th>Colegio</th>
                                             <th>Curso</th>
                                             <th>Status</th>
                                             <th>Acciones</th>

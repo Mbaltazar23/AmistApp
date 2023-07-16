@@ -1,6 +1,6 @@
 <!--Modal de la insercion/actualizacion de los tutores a manipular-->
 <div class="modal fade" id="modalFormTutores" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" >
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="titleModal"></h5>
@@ -26,10 +26,19 @@
                             <label class="control-label">Correo</label>
                             <input class="form-control" id="txtCorreoT" name="txtCorreoT" type="text" />
                         </div>
-                        <div class="form-group col-md-6 selectCursos">
-                            <label class="control-label">Curso</label>
-                            <select class="form-control" id="listCurso" name="listCurso"></select>
+                        <div class="form-group col-md-6">
+                            <label class="control-label">Puntaje Inicial</label>
+                            <input class="form-control" id="txtPuntajeInicial" name="txtPuntajeInicial"
+                                type="number" />
                         </div>
+                    </div>
+                    <div class="form-group selectCursos">
+                        <label class="control-label">Curso</label>
+                        <select class="form-control" id="listCursos" name="listCursos[]" multiple></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Contraseña</label>
+                        <input class="form-control" id="txtPassword" name="txtPassword" type="password">
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-6">
@@ -43,8 +52,10 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button id="btnActionForm" class="btn btn-primary" type="submit"><i class="fas fa-check-circle"></i><span id="btnText"></span></button>&nbsp;&nbsp;
-                        <button class="btn btn-danger" type="button" data-dismiss="modal"><i class="fas fa-times-circle"></i>&nbsp;Cerrar</button>
+                        <button id="btnActionForm" class="btn btn-primary" type="submit"><i
+                                class="fas fa-check-circle"></i><span id="btnText"></span></button>&nbsp;&nbsp;
+                        <button class="btn btn-danger" type="button" data-dismiss="modal"><i
+                                class="fas fa-times-circle"></i>&nbsp;Cerrar</button>
                     </div>
                 </form>
             </div>
@@ -54,7 +65,7 @@
 
 <!--Modal donde se vera el detalle del tutor registrado-->
 <div class="modal fade" id="modalViewTutor" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" >
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Datos del Profesor</h5>

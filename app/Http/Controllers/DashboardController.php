@@ -112,13 +112,13 @@ class DashboardController extends Controller
     public function darFormatoFecha($fechaTex)
     {
         $fecha = substr($fechaTex, 0, 10);
-        $numeroDia = date('d', strtotime($fecha));
+        //$numeroDia = date('d', strtotime($fecha));
         $dia = date('l', strtotime($fecha));
         $mes = date('F', strtotime($fecha));
         $anio = date('Y', strtotime($fecha));
         $dias_ES = array("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo");
         $dias_EN = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
-        $nombredia = str_replace($dias_EN, $dias_ES, $dia);
+        //$nombredia = str_replace($dias_EN, $dias_ES, $dia);
         $meses_ES = array("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre");
         $meses_EN = array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
         $nombreMes = str_replace($meses_EN, $meses_ES, $mes);
@@ -143,6 +143,7 @@ class DashboardController extends Controller
                         "submodulos" => array(
                             "Adminstrador(s) Colegio" => array("pagina" => "admin-colegio"),
                             "Colegios" => array("pagina" => "colegios"),
+                            "Alumnos" => array("pagina" => "alumnos-all"),
                         ),
                     ),
                     "Catalogo" => array(
@@ -154,7 +155,16 @@ class DashboardController extends Controller
                     ),
                 );
             } else if ($role->role == env("ROLADMINCOLE")) {
+                $idUser = Auth::user()->id;
+                $user = User::with('colleges.college')->find($idUser);
+                $collegeName = $user->colleges->first()->college->name;
                 $navAdmin = array(
+                    "Colegio Designado" => array(
+                        "icon" => "fas fa-school",
+                        "submodulos" => array(
+                            $collegeName => array("pagina" => "dashboard"),
+                        ),
+                    ),
                     "Educacion" => array(
                         "icon" => "fas fa-user-graduate",
                         "submodulos" => array(
@@ -379,7 +389,7 @@ class DashboardController extends Controller
 
         $totalActionsCount = Action::where("status", "!=", 0)->count();
 
-        $percentageActions = ($studentActionsCount / $totalActionsCount) * 100;
+        $percentageActions = ($totalActionsCount > 0) ?? ($studentActionsCount / $totalActionsCount) * 100;
 
         return round($percentageActions, 2);
     }
@@ -396,7 +406,7 @@ class DashboardController extends Controller
             $query->where('role', env("ROLALU"));
         })->sum('points');
 
-        $student_points_percentage = ($studentPointsActionsCount / $studentPointsCount) * 100;
+        $student_points_percentage = ($studentPointsCount > 0) ?? ($studentPointsActionsCount / $studentPointsCount) * 100;
 
         return round($student_points_percentage, 2);
     }
@@ -465,13 +475,11 @@ class DashboardController extends Controller
 
     public function countsTeachersCourse($collegeId)
     {
-        $teachersCount = Teacher::whereHas('course.college', function ($query) use ($collegeId) {
-            $query->where('id', $collegeId);
-        })
-            ->whereHas('user', function ($query) {
-                $query->where('status', 1);
-            })
-            ->count();
+        $teachersCount = Teacher::whereHas('courses', function ($query) use ($collegeId) {
+            $query->where('college_id', $collegeId);
+        })->whereHas('user', function ($query) {
+            $query->where('status', 1);
+        })->count();
 
         return $teachersCount;
     }

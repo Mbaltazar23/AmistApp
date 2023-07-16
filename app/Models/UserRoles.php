@@ -27,6 +27,4 @@ class UserRoles extends Model
     {
         return $this->role == $role;
     }
-
-
 }

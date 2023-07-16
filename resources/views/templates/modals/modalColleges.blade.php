@@ -22,6 +22,10 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="control-label">Capacidad de Alumnos</label>
+                        <input class="form-control" id="txtStockAlumns" name="txtStockAlumns" type="text">
+                    </div>
+                    <div class="form-group">
                         <label class="control-label">Telefono</label>
                         <input class="form-control" id="txtTelefono" name="txtTelefono" type="text" value="+569" maxlength="12">
                     </div>
@@ -67,6 +71,10 @@
                         <tr>
                             <td>Direccion:</td>
                             <td id="celDireccion"></td>
+                        </tr>
+                        <tr>
+                            <td>Capacidad de Alumnos</td>
+                            <td id="celAlumnosStock"></td>
                         </tr>
                         <tr>
                             <td>Fecha:</td>

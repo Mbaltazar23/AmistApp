@@ -21,4 +21,10 @@ class Action extends Model
     {
         return $this->hasMany(PointAlumnAction::class);
     }
+
+    public function collegeUsers()
+    {
+        return $this->hasManyThrough(CollegeUser::class, PointAlumnAction::class, 'action_id', 'id', 'id', 'user_recept_id');
+    }
+
 }

@@ -61,6 +61,7 @@ class CollegeController extends Controller
         $dni = $request->input('txtRut');
         $name = ucwords($request->input('txtNombre'));
         $phone = $request->input('txtTelefono');
+        $stockAlums = $request->input("txtStockAlumns");
         $address = ucfirst($request->input('txtDireccion'));
         if ($id) {
             // actualizar colegio
@@ -68,6 +69,7 @@ class CollegeController extends Controller
             $college->dni = $dni;
             $college->name = $name;
             $college->phone = $phone;
+            $college->stock_alumns = $stockAlums;
             if (!$address) {
                 $college->address = '';
             } else {
@@ -81,8 +83,8 @@ class CollegeController extends Controller
             $college->dni = $dni;
             $college->name = $name;
             $college->phone = $phone;
+            $college->stock_alumns = $stockAlums;
             $college->remember_token = Str::random(10);
-
             if (!$address) {
                 $college->address = '';
             } else {
@@ -106,6 +108,7 @@ class CollegeController extends Controller
                     'nombre' => $college->name,
                     'telefono' => $college->phone,
                     'direccion' => $college->address,
+                    'stock_alumnos' => $college->stock_alumns,
                     'fecha' => $college->created_at->format('d-m-Y'),
                     'hora' => $college->created_at->format('H:i:s'),
                     'status' => $college->status,
@@ -127,13 +130,6 @@ class CollegeController extends Controller
 
         if (!$college) {
             return response()->json(['status' => false, 'msg' => 'El Colegio no existe']);
-        }
-
-        if ($status == 0) {
-            $hasUserCollege = $college->usersCollege()->exists();
-            if ($hasUserCollege) {
-                return response()->json(['status' => false, 'msg' => 'Este Colegio ya tiene un Admin vinculado', 'data' => $college]);
-            }
         }
 
         $college->status = $status;

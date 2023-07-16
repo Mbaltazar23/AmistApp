@@ -52,7 +52,7 @@ Route::middleware('role:' . env("ROLALU"))->group(function () {
     /* Modulo Catalogo */
     Route::get('/student/catalog/cats', [ProductController::class, 'index']);
     Route::get('/student/catalog/cats/{idCat}', [ProductController::class, 'indexCat']);
-    Route::get('/student/catalog-alumn', [ProductController::class, 'indexCatAlum']);
+    Route::get('/student/catalog/alum', [ProductController::class, 'indexCatAlum']);
     Route::post('/student/catalog/setPurchase/{id}', [ProductController::class, 'store']);
     Route::delete('/student/catalog/deletePurchase/{id}', [ProductController::class, 'destroy']);
     /* Modulo Notificaciones */

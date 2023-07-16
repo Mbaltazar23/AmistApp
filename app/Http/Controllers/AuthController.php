@@ -88,12 +88,11 @@ class AuthController extends Controller
                         $query->where('user_id', $user->id);
                     })->first();
                     // Anida el colegio al usuario
-                    $user->college = $college;
+                    $user->colleges = $college;
                     break;
                 }
 
             }
-
             // Agregamos la imagen al objeto usuario
             $user->imgPerfil = $imgPerfil;
 

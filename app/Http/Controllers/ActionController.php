@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Action;
-use App\Models\PointAlumnAction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -92,8 +91,8 @@ class ActionController extends Controller
                 $action->points = $points;
                 $action->remember_token = $remember_token;
                 $action->save();
-                return response()->json(['status' => true, 'msg' => 'Accion registrada Exitosamente !!', 
-                'data' => $action]);
+                return response()->json(['status' => true, 'msg' => 'Accion registrada Exitosamente !!',
+                    'data' => $action]);
             }
         }
     }
@@ -130,14 +129,7 @@ class ActionController extends Controller
         $status = $request->input('status');
         $action = Action::find($id);
 
-        // Si la accion está siendo desactivada (es decir, su status es 0), entonces verificamos si fueron ocupados por los alumnos.
-        if ($status == 0) {
-            $has_actions = PointAlumnAction::where('action_id', $action->id)->exists();
-            if ($has_actions) {
-                return response()->json(['status' => false, 'msg' => 'Esta Accion ya esta en uso']);
-            }
-        }
-
+        // Si la accion está siendo desactivada (es decir, su status es 0), entonces verificamos si fueron ocupados por los alumnos
         $action->status = $status;
         $action->save();
 
@@ -152,17 +144,21 @@ class ActionController extends Controller
 
     public function getReport()
     {
-        $actions = Action::all();
+        $actions = Action::with('collegeUsers')->get();
         $formaterActions = [];
         foreach ($actions as $action) {
+            $collegeNames = $action->collegeUsers->pluck('college.name')->implode(', '); // Obtener los nombres de los colegios separados por coma
+            $collegeCounts = $action->collegeUsers->countBy('college.name')->toArray(); // Obtener la cantidad de veces que se utilizó la acción por cada colegio
             $formaterActions[] = [
                 'id' => $action->id,
                 'nombre' => $action->name,
                 'puntos' => $action->points,
-                'tipo' => "Para " . $actions->type,
+                'tipo' => "Para " . $action->type,
                 'fecha' => Carbon::parse($action->created_at)->format('d-m-Y'),
                 'hora' => Carbon::parse($action->created_at)->format('H:i:s'),
                 'status' => $action->status,
+                'colegios' => $collegeNames, // Agregar la información de los colegios
+                'cantidad_colegios' => $collegeCounts, // Agregar la cantidad de veces que se utilizó la acción por cada colegio
             ];
         }
 

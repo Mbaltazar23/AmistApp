@@ -78,7 +78,7 @@ class AdminColeController extends Controller
         $name = ucwords($request->input('txtNombre'));
         $email = ucwords($request->input('txtEmail'));
         $phone = $request->input('txtTelefono');
-        $password = bcrypt("AmistApp.");
+        $password = $request->input('txtPassword'); // Obtener el valor del campo de contraseña
         $address = $request->input('txtDireccion');
         $rolA = env("ROLADMINCOLE");
 
@@ -88,7 +88,7 @@ class AdminColeController extends Controller
             $user->dni = $dni;
             $user->name = $name;
             $user->email = $email;
-            $user->password = $password;
+            $user->password = bcrypt($password);
             $user->phone = $phone;
             if (!$address) {
                 $user->address = '';
@@ -111,7 +111,7 @@ class AdminColeController extends Controller
             $user->dni = $dni;
             $user->name = $name;
             $user->email = $email;
-            $user->password = $password;
+            $user->password = bcrypt("AmistApp.");
             $user->phone = $phone;
             $user->remember_token = Str::random(10);
 
@@ -257,7 +257,7 @@ class AdminColeController extends Controller
         $rol = env('ROLADMINCOLE');
         $usersAdmins = User::whereHas('roles', function ($query) use ($rol) {
             $query->where('role', $rol);
-        })->orWhereHas('colleges')->get();
+        })->get();
 
         return response()->json([
             'data' => $usersAdmins,

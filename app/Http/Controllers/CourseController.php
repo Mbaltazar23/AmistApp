@@ -24,13 +24,14 @@ class CourseController extends Controller
 
     public function getCourses()
     {
-        $courses = Course:: where('college_id', Auth::user()->colleges->first()->college_id)
-                 ->get();
+        $courses = Course::where('college_id', Auth::user()->colleges->first()->college_id)
+            ->get();
         $data = [];
         foreach ($courses as $key => $course) {
             $btnView = '';
             $btnEdit = '';
             $btnDelete = '';
+            $btnAllDelete = '';
             $row = [
                 'nro' => $key + 1,
                 'nombre' => $course->name . ' ' . $course->section,
@@ -39,16 +40,18 @@ class CourseController extends Controller
             ];
             if ($course->status == 1) {
                 $row['status'] = '<span class="badge badge-success">Activo</span>';
-                $btnView = '<button class="btn btn-info btn-sm" onClick="fntViewInfo(' . ($key + 1) . ',' . $course->id . ')" title="Ver course"><i class="far fa-eye"></i></button>';
-                $btnEdit = '<button class="btn btn-primary  btn-sm" onClick="fntEditInfo(this,' . $course->id . ')" title="Editar course"><i class="fas fa-pencil-alt"></i></button>';
-                $btnDelete = '<button class="btn btn-danger btn-sm" onClick="fntDelInfo(' . $course->id . ')" title="Eliminar course"><i class="far fa-trash-alt"></i></button>';
+                $btnView = '<button class="btn btn-info btn-sm" onClick="fntViewInfo(' . ($key + 1) . ',' . $course->id . ')" title="Ver Curso"><i class="far fa-eye"></i></button>';
+                $btnEdit = '<button class="btn btn-primary  btn-sm" onClick="fntEditInfo(this,' . $course->id . ')" title="Editar Curso"><i class="fas fa-pencil-alt"></i></button>';
+                $btnDelete = '<button class="btn btn-danger btn-sm" onClick="fntDelInfo(' . $course->id . ')" title="Inhabilitar Curso"><i class="far fa-trash-alt"></i></button>';
+                $btnAllDelete = '<button class="btn btn-secondary btn-sm" onClick="fntDelAll(' . $course->id . ')" title="Eliminar Curso" disabled><i class="far fa-trash-alt"></i></button>';
             } else {
                 $row['status'] = '<span class="badge badge-danger">Inactivo</span>';
-                $btnView = '<button class="btn btn-secondary btn-sm" onClick="fntViewInfo(' . ($key + 1) . ',' . $course->id . ')" title="Ver course" disabled><i class="far fa-eye"></i></button>';
-                $btnEdit = '<button class="btn btn-secondary  btn-sm" onClick="fntEditInfo(this,' . $course->id . ')" title="Editar course" disabled><i class="fas fa-pencil-alt"></i></button>';
-                $btnDelete = '<button class="btn btn-dark btn-sm" onClick="fntActivateInfo(' . $course->id . ')" title="Activar course"><i class="fas fa-toggle-on"></i></button>';
+                $btnView = '<button class="btn btn-secondary btn-sm" onClick="fntViewInfo(' . ($key + 1) . ',' . $course->id . ')" title="Ver Curso" disabled><i class="far fa-eye"></i></button>';
+                $btnEdit = '<button class="btn btn-secondary  btn-sm" onClick="fntEditInfo(this,' . $course->id . ')" title="Editar Curso" disabled><i class="fas fa-pencil-alt"></i></button>';
+                $btnDelete = '<button class="btn btn-dark btn-sm" onClick="fntActivateInfo(' . $course->id . ')" title="Activar Curso"><i class="fas fa-toggle-on"></i></button>';
+                $btnAllDelete = '<button class="btn btn-dark btn-sm" onClick="fntDelAll(' . $course->id . ')" title="Eliminar Curso"><i class="far fa-trash-alt"></i></button>';
             }
-            $row['options'] = '<div class="text-center">' . $btnView . '  ' . $btnEdit . '  ' . $btnDelete . '</div>';
+            $row['options'] = '<div class="text-center">' . $btnView . '  ' . $btnEdit . '  ' . $btnDelete . ' ' . $btnAllDelete . '</div>';
             $data[] = $row;
         }
 
@@ -138,11 +141,23 @@ class CourseController extends Controller
         return response()->json(['status' => true, 'msg' => $message]);
     }
 
+    public function deleteCourse($id)
+    {
+        $course = Course::find($id);
+
+        if (!$course) {
+            return response()->json(['status' => false, 'msg' => 'El Curso no existe']);
+        }
+        $course->delete();
+
+        return response()->json(['status' => true, 'msg' => "Curso Eliminado Exitosamente !!"]);
+    }
+
     public function getReport()
     {
         $courses = Course::where('college_id', Auth::user()->colleges->first()->college_id)
-        ->withCount(['students', 'teachers'])
-        ->get();
+            ->withCount(['students', 'teachers'])
+            ->get();
         $data = [];
         foreach ($courses as $i => $course) {
             $data[] = [
@@ -164,18 +179,18 @@ class CourseController extends Controller
     {
         $courses = Course::where('status', '!=', 0)
             ->where('college_id', Auth::user()->colleges->first()->college_id);
-    
+
         if ($select == 'alumno') {
-            $courses = $courses->has('teachers');
-        } 
-        
-        $courses = $courses->get();
-    
+            $courses = $courses->whereHas('teachers');
+        }
+
+        $courses = $courses->with('teachers')->get();
+
         $html = '<option value="0">Seleccione un Curso</option>';
         foreach ($courses as $course) {
             $html .= '<option value="' . $course->id . '">' . $course->name . ' ' . $course->section . '</option>';
         }
         return $html;
     }
-    
+
 }
