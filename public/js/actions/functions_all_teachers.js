@@ -1,7 +1,7 @@
-let tableAlumns;
+let tableTeachers;
 let rowTable = "";
 document.addEventListener("DOMContentLoaded", function () {
-    tableAlumns = $("#tableAlumnsAll").dataTable({
+    tableTeachers = $("#tableTeachersAll").dataTable({
         aProcessing: true,
         aServerSide: true,
         language: {
@@ -12,13 +12,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 data: "dni"
             },
             {
-                data: "alumno"
+                data: "profesor"
             },
             {
                 data: "colegio"
             },
             {
-                data: "curso"
+                data: "cursos"
             }, {
                 data: "status"
             }, {
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
             },
         ],
         ajax: {
-            url: "/students-all",
+            url: "/teachers-all",
             method: "GET",
             dataSrc: function (json) {
                 if (! json.status) {
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
         paging: true,
         ordering: true,
         info: true,
-        autoWidth: false,
+        autoWidth: true,
         responsive: true,
         bDestroy: true,
         iDisplayLength: 10,
@@ -51,8 +51,8 @@ document.addEventListener("DOMContentLoaded", function () {
         ]
     });
 
-    let formAlumns = document.querySelector("#formAlumnsPass");
-    formAlumns.onsubmit = function (e) {
+    let formTeachers = document.querySelector("#formTeachersPass");
+    formTeachers.onsubmit = function (e) {
         e.preventDefault();
 
         let txtPassword01 = document.querySelector("#txtPassword01").value;
@@ -62,13 +62,13 @@ document.addEventListener("DOMContentLoaded", function () {
             swal("Error", "Las contraseñas no coinciden", "error");
             return false;
         }
-        let formData = new FormData(formAlumns);
+        let formData = new FormData(formTeachers);
 
-        axios.post("/students-all/setPassword", formData).then(function (response) {
+        axios.post("/teachers-all/setPassword", formData).then(function (response) {
             if (response.data.status) {
-                tableAlumns.api().ajax.reload();
-                $("#modalFormAlumnoPass").modal("hide");
-                formAlumns.reset();
+                tableTeachers.api().ajax.reload();
+                $("#modalFormTeacherPass").modal("hide");
+                formTeachers.reset();
                 swal("Éxito", response.data.msg, "success");
             } else {
                 swal("Error", response.data.msg, "error");
@@ -79,8 +79,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    let formAlumnsPoints = document.querySelector("#formAlumnsPoints");
-    formAlumnsPoints.onsubmit = function (e) {
+    let formTeachersPoints = document.querySelector("#formTeachersPoints");
+    formTeachersPoints.onsubmit = function (e) {
         e.preventDefault();
 
         let txtPuntaje = document.querySelector("#txtPuntaje").value;
@@ -96,13 +96,13 @@ document.addEventListener("DOMContentLoaded", function () {
             swal("Error", "El puntaje no puede estar vacío.", "error");
             return false;
         }
-        let formData = new FormData(formAlumnsPoints);
+        let formData = new FormData(formTeachersPoints);
 
-        axios.post("/students-all/setPoints", formData).then(function (response) {
+        axios.post("/teachers-all/setPoints", formData).then(function (response) {
             if (response.data.status) {
-                tableAlumns.api().ajax.reload();
-                $("#modalFormAlumnoPoints").modal("hide");
-                formAlumns.reset();
+                tableTeachers.api().ajax.reload();
+                $("#modalFormTeacherPoints").modal("hide");
+                formTeachers.reset();
                 swal("Éxito", response.data.msg, "success");
             } else {
                 swal("Error", response.data.msg, "error");
@@ -116,13 +116,13 @@ document.addEventListener("DOMContentLoaded", function () {
 }, false);
 
 
-function fntChangePassword(idAlumn) {
-    axios.get(`/students-all/select/${idAlumn}`).then(function (response) {
+function fntChangePassword(idTeacher) {
+    axios.get(`/teachers-all/select/${idTeacher}`).then(function (response) {
         if (response.data.status) {
-            document.querySelector("#idAlumn").value = response.data.data.id;
-            document.querySelector("#rutAlum").innerHTML = response.data.data.dni;
-            document.querySelector("#nombreAlum").innerHTML = response.data.data.nombre;
-            document.querySelector("#emailAlum").innerHTML = response.data.data.correo;
+            document.querySelector("#idTeacher").value = response.data.data.id;
+            document.querySelector("#rutTeacher").innerHTML = response.data.data.dni;
+            document.querySelector("#nombreTeacher").innerHTML = response.data.data.nombre;
+            document.querySelector("#emailTeacher").innerHTML = response.data.data.correo;
         } else {
             swal("Error", response.data.msg, "error");
         }
@@ -130,17 +130,17 @@ function fntChangePassword(idAlumn) {
         console.log(error);
         swal("Error", "Ocurrió un error al procesar la petición", "error");
     });
-    $("#modalFormAlumnoPass").modal("show");
+    $("#modalFormTeacherPass").modal("show");
 }
 
 
-function fntSetPoints(idAlumn) {
-    axios.get(`/students-all/select/${idAlumn}`).then(function (response) {
+function fntSetPoints(idTeacher) {
+    axios.get(`/teachers-all/select/${idTeacher}`).then(function (response) {
         if (response.data.status) {
-            document.querySelector("#idAlumnPoint").value = response.data.data.id;
-            document.querySelector("#rutAlumPoint").innerHTML = response.data.data.dni;
-            document.querySelector("#nombreAlumPoint").innerHTML = response.data.data.nombre;
-            document.querySelector("#emailAlumPoint").innerHTML = response.data.data.correo;
+            document.querySelector("#idTeacherPoint").value = response.data.data.id;
+            document.querySelector("#rutTeacherPoint").innerHTML = response.data.data.dni;
+            document.querySelector("#nombreTeacherPoint").innerHTML = response.data.data.nombre;
+            document.querySelector("#emailTeacherPoint").innerHTML = response.data.data.correo;
             document.querySelector("#txtPuntaje").value = response.data.data.puntos !== 0 ? response.data.data.puntos : '';
         } else {
             swal("Error", response.data.msg, "error");
@@ -149,24 +149,24 @@ function fntSetPoints(idAlumn) {
         console.log(error);
         swal("Error", "Ocurrió un error al procesar la petición", "error");
     });
-    $("#modalFormAlumnoPoints").modal("show");
+    $("#modalFormTeacherPoints").modal("show");
 }
 
 
-function fntDisableAccount(idalumn) {
+function fntDisableAccount(idTeacher) {
     swal({
-        title: "Inhabilitar Cuenta del Alumno",
-        text: "¿Realmente quiere inhabilitar a este Alumno?",
+        title: "Inhabilitar Cuenta del Profesor",
+        text: "¿Realmente quiere inhabilitar a este profesor?",
         icon: "warning",
         dangerMode: true,
         buttons: true
     }).then((isClosed) => {
         if (isClosed) {
             let status = 0;
-            axios.post(`/students-all/status/${idalumn}`, {status: status}).then((response) => {
+            axios.post(`/teachers-all/status/${idTeacher}`, {status: status}).then((response) => {
                 if (response.data.status) {
                     swal("Inhabilitado!", response.data.msg, "success");
-                    tableAlumns.api().ajax.reload();
+                    tableTeachers.api().ajax.reload();
                 } else {
                     swal("Atención!", response.data.msg, "error");
                 }
@@ -177,20 +177,20 @@ function fntDisableAccount(idalumn) {
     });
 }
 
-function fntEnableAccount(idalumn) {
+function fntEnableAccount(idTeacher) {
     swal({
-        title: "Habilitar Cuenta del Alumno",
-        text: "¿Realmente quiere habilitar a este alumno?",
+        title: "Habilitar Cuenta del Profesor",
+        text: "¿Realmente quiere habilitar a este profesor?",
         icon: "info",
         dangerMode: true,
         buttons: true
     }).then((isClosed) => {
         if (isClosed) {
             let status = 1;
-            axios.post(`/students-all/status/${idalumn}`, {status: status}).then((response) => {
+            axios.post(`/teachers-all/status/${idTeacher}`, {status: status}).then((response) => {
                 if (response.data.status) {
                     swal("Habilitado !!", response.data.msg, "success");
-                    tableAlumns.api().ajax.reload();
+                    tableTeachers.api().ajax.reload();
                 } else {
                     swal("Atención!", response.data.msg, "error");
                 }
@@ -202,23 +202,23 @@ function fntEnableAccount(idalumn) {
 }
 
 function generarReporte() {
-    axios.post("/students-all/report").then(function (response) {
+    axios.post("/teachers-all/report").then(function (response) {
         var fecha = new Date();
-        var Alumnos = response.data.data;
+        var Profesores = response.data.data;
         let estado = "";
         var pdf = new jsPDF();
-        pdf.text(20, 20, "Reportes de los Alumnos Registrados");
+        pdf.text(20, 20, "Reportes de los Profesores Registrados");
         var data = [];
         var columns = [
             "RUT",
-            "ALUMNO",
+            "PROFESOR",
             "DIRECCION",
             "COLEGIO",
-            "CURSO",
+            "CURSOS",
             "ESTADO",
         ];
-        for (let i = 0; i < Alumnos.length; i++) {
-            if (Alumnos[i].status == 1) {
+        for (let i = 0; i < Profesores.length; i++) {
+            if (Profesores[i].status == 1) {
                 estado = "ACTIVO";
             } else {
                 estado = "INACTIVO";
@@ -228,28 +228,28 @@ function generarReporte() {
             let telefono = '';
             let direccion = '';
 
-            if (Alumnos[i].alumno.hasOwnProperty('Nombres')) {
-                nombres = Alumnos[i].alumno.Nombres;
+            if (Profesores[i].profesor.hasOwnProperty('Nombres')) {
+                nombres = Profesores[i].profesor.Nombres;
             }
 
-            if (Alumnos[i].alumno.hasOwnProperty('Email')) {
-                email = Alumnos[i].alumno.Email;
+            if (Profesores[i].profesor.hasOwnProperty('Email')) {
+                email = Profesores[i].profesor.Email;
             }
 
-            if (Alumnos[i].alumno.hasOwnProperty('Teléfono')) {
-                telefono = Alumnos[i].alumno['Teléfono'];
+            if (Profesores[i].profesor.hasOwnProperty('Teléfono')) {
+                telefono = Profesores[i].profesor.Teléfono;
             }
 
-            if (Alumnos[i].hasOwnProperty('direccion')) {
-                direccion = Alumnos[i].direccion;
+            if (Profesores[i].hasOwnProperty('direccion')) {
+                direccion = Profesores[i].direccion;
             }
 
             data[i] = [
-                Alumnos[i].dni,
+                Profesores[i].dni,
                 nombres + ' (' + email + ')' + "\n" + " Fono: (" + telefono + ")",
                 direccion != "" ? direccion : "No se tiene una dirección registrada",
-                Alumnos[i].colegio,
-                Alumnos[i].curso,
+                Profesores[i].colegio,
+                Profesores[i].cursos,
                 estado,
             ];
         }
@@ -275,7 +275,7 @@ function generarReporte() {
         pdf.text(20, pdf.autoTable.previous.finalY + 20, "Fecha de Creacion : " + fecha.getDate() + "/" + (
             fecha.getMonth() + 1
         ) + "/" + fecha.getFullYear());
-        pdf.save("ReporteAlumnos.pdf");
+        pdf.save("ReporteProfesores.pdf");
         swal("Exito", "Reporte Impreso Exitosamente", "success");
     }).catch(function (error) {
         console.log(error);

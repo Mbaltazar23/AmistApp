@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
         paging: true,
         ordering: true,
         info: true,
-        autoWidth: false,
+        autoWidth: true,
         responsive: true,
         bDestroy: true,
         iDisplayLength: 10,
@@ -114,7 +114,7 @@ function fntViewInfo(idTutor) {
 
             document.querySelector("#celRutT").innerHTML = response.data.data.dni;
             document.querySelector("#celNombresT").innerHTML = response.data.data.nombre;
-            document.querySelector("#celCorreoT").innerHTML = response.data.data.email;
+            document.querySelector("#celCorreoT").innerHTML = response.data.data.correo;
             document.querySelector("#celTelefonoT").innerHTML = response.data.data.telefono;
             document.querySelector("#celDireccionT").innerHTML = response.data.data.direccion != "" ? response.data.data.direccion : "No hay una direccion registrada";
             document.querySelector("#celCursoT").innerHTML = response.data.data.curso;
@@ -140,7 +140,7 @@ function fntEditInfo(element, idTutor) {
             document.querySelector("#txtRutT").value = response.data.data.dni;
             document.querySelector("#txtNombres").value = response.data.data.nombre.toString().toLowerCase();
 
-            document.querySelector("#txtCorreoT").value = response.data.data.email.toString().toLowerCase();
+            document.querySelector("#txtCorreoT").value = response.data.data.correo.toString().toLowerCase();
             document.querySelector("#txtTelefono").value = response.data.data.telefono;
             document.querySelector("#txtDireccion").value = response.data.data.direccion;
             document.querySelector("#txtPassword").parentElement.style.display = "block";
@@ -150,10 +150,8 @@ function fntEditInfo(element, idTutor) {
 
             // Select2: Seleccionar los cursos asociados
             const cursos = response.data.data.cursos;
-            cursos.forEach((curso) => {
-                const option = new Option(curso.name, curso.id, true, true);
-                $("#listCursos").append(option).trigger('change');
-            });
+            const cursosIds = cursos.map(curso => curso.id);  // Obtener los IDs de los cursos
+            $("#listCursos").val(cursosIds).trigger('change');  // Preseleccionar cursos por sus IDs
 
             validadorRut("txtRutT");
             $("#modalFormTutores").modal("show");

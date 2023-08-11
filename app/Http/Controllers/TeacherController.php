@@ -24,6 +24,17 @@ class TeacherController extends Controller
         return view('teachers.index', compact('data'));
     }
 
+    public function allTeachers()
+    {
+        $data = [
+            'page_tag' => env("NOMBRE_WEB") . " - Profesores",
+            'page_title' => 'Profesores',
+            'page_functions_js' => 'functions_all_teachers.js',
+        ];
+
+        return view('teachers.teachers_all', compact('data'));
+    }
+
     public function getTeachers()
     {
         $college_id = Auth::user()->colleges->first()->college_id;
@@ -43,8 +54,8 @@ class TeacherController extends Controller
             foreach ($user->teachers as $teacher) {
 
                 $courses = $teacher->courses->map(function ($course) {
-                    return $course->name . ' ' . $course->section;
-                })->implode(', ');
+                    return '-' . '<strong>' . $course->name . '</strong>  ' . $course->section;
+                })->implode('<br>'); // Cambiar \n por <br> para salto de línea HTML
 
                 $row = [
                     'dni' => $user->dni,
@@ -65,7 +76,7 @@ class TeacherController extends Controller
                     $btnDelete = '<button class="btn btn-dark btn-sm" onClick="fntActivateInfo(' . $user->id . ')" title="Activar Profesor"><i class="fas fa-toggle-on"></i></button>';
                     $btnAllDelete = '<button class="btn btn-dark btn-sm" onClick="fntDelAll(' . $user->id . ')" title="Eliminar Profesor"><i class="far fa-trash-alt"></i></button>';
                 }
-                $row['options'] = '<div class="text-center">' . $btnView . ' ' . $btnEdit . ' ' . $btnDelete.' '.$btnAllDelete. '</div>';
+                $row['options'] = '<div class="text-center">' . $btnView . ' ' . $btnEdit . ' ' . $btnDelete . ' ' . $btnAllDelete . '</div>';
                 $data[] = $row;
             }
         }
@@ -75,6 +86,51 @@ class TeacherController extends Controller
             'data' => $data,
         ]);
 
+    }
+
+    public function getAllTeachers()
+    {
+        $teachers = User::with('teachers.courses.college', 'teachers')->whereHas('teachers')->get();
+
+        $data = [];
+        foreach ($teachers as $key => $user) {
+            $btnChangePassword = '';
+            $btnSetPoints = "";
+            $btnDisableAccount = '';
+
+            $courses = [];
+            foreach ($user->teachers as $teacher) {
+                foreach ($teacher->courses as $course) {
+                    $collegeName = $course->college->name;
+                    $courseInfo = '<strong>' . $course->name . '</strong>  ' . $course->section;
+                    $courses[] = $courseInfo;
+                }
+                $row = [
+                    'dni' => $user->dni,
+                    'profesor' => '<strong>Nombres:</strong> ' . $user->name . '<br><strong>Email:</strong> ' . $user->email . '<br><strong>Teléfono:</strong> ' . $user->phone,
+                    'cursos' => implode('<br>', $courses), // Convertir el array de cursos en una cadena
+                    'colegio' => $collegeName, // No seguro si esta variable es correcta aquí, revisa tu lógica
+                ];
+                if ($user->status == 1) {
+                    $row['status'] = '<span class="badge badge-success">Activo</span>';
+                    $btnSetPoints = '<button class="btn btn-dark btn-sm" onClick="fntSetPoints(' . $user->id . ')" title="Asignar Puntaje"><i class="fas fa-star"></i></button>';
+                    $btnChangePassword = '<button class="btn btn-primary btn-sm" onClick="fntChangePassword(' . $user->id . ')" title="Cambiar Contraseña"><i class="fas fa-key"></i></button>';
+                    $btnDisableAccount = '<button class="btn btn-danger btn-sm" onClick="fntDisableAccount(' . $user->id . ')" title="Ocultar/Inhabilitar Cuenta"><i class="fas fa-user-times"></i></button>';
+                } else {
+                    $row['status'] = '<span class="badge badge-danger">Inactivo</span>';
+                    $btnSetPoints = '<button class="btn btn-secondary btn-sm" onClick="fntSetPoints(' . $user->id . ')" title="Asignar Puntaje" disabled><i class="fas fa-star"></i></button>';
+                    $btnChangePassword = '<button class="btn btn-secondary btn-sm" onClick="fntChangePassword(' . $user->id . ')" title="Cambiar Contraseña" disabled><i class="fas fa-key"></i></button>';
+                    $btnDisableAccount = '<button class="btn btn-secondary btn-sm" onClick="fntEnableAccount(' . $user->id . ')" title="Mostrar/Habilitar Cuenta"><i class="fas fa-user-check"></i></button>';
+                }
+                $row['options'] = '<div class="text-center">' . $btnSetPoints . ' ' . $btnChangePassword . ' ' . $btnDisableAccount . '</div>';
+                $data[] = $row;
+            }
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $data,
+        ]);
     }
 
     public function setTeacher(Request $request)
@@ -87,7 +143,6 @@ class TeacherController extends Controller
         $phone = $request->input('txtTelefono');
         $address = $request->input('txtDireccion');
         $password = bcrypt($request->input("txtPassword")) ?? bcrypt('AmistApp.');
-        $points = $request->input("txtPuntajeInicial") ?? 500;
         $college_id = Auth::user()->colleges->first()->college_id;
         $rol = env("ROLPROFE");
 
@@ -99,7 +154,6 @@ class TeacherController extends Controller
             $user->phone = $phone;
             $user->password = $password;
             $user->address = $address ? $address : '';
-            $user->points = $points;
             $user->save();
 
             // Actualizar los cursos del profesor
@@ -116,7 +170,6 @@ class TeacherController extends Controller
             $user->phone = $phone;
             $user->address = $address ? $address : '';
             $user->password = $password;
-            $user->points = $points;
             $user->remember_token = Str::random(10);
             $user->save();
 
@@ -169,13 +222,14 @@ class TeacherController extends Controller
                     'id' => $teacher->id,
                     'dni' => $teacher->dni,
                     'nombre' => $teacher->name,
-                    'email' => $teacher->email,
+                    'correo' => $teacher->email,
                     'direccion' => $teacher->address,
                     'telefono' => $teacher->phone,
                     'fecha' => $teacher->created_at->format('d-m-Y'),
                     'hora' => $teacher->created_at->format('H:i:s'),
                     'status' => $teacher->status,
                     'cursos' => $courses,
+                    'puntos' => $teacher->points,
                 ],
                 'msg' => 'Profesor obtenido correctamente',
             ]);
@@ -183,6 +237,52 @@ class TeacherController extends Controller
             return response()->json([
                 'status' => false,
                 'msg' => 'No se pudo obtener al profesor',
+            ]);
+        }
+    }
+
+    public function setPasswordTeacher(Request $request)
+    {
+        $id = $request->input('idTeacher');
+        $password = $request->input('txtPassword01');
+
+        try {
+            $user = User::findOrFail($id);
+            $user->password = bcrypt($password);
+            $user->save();
+
+            return response()->json([
+                'status' => true,
+                'msg' => 'Contraseña actualizada exitosamente.',
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'msg' => 'Error al actualizar la contraseña.' . $e,
+            ]);
+        }
+    }
+
+    public function setPointsTeacher(Request $request)
+    {
+        $id = $request->input('idTeacherPoint');
+        $points = $request->input('txtPuntaje');
+
+        try {
+            $user = User::findOrFail($id);
+            $user->points = $points;
+            $user->save();
+
+            return response()->json([
+                'status' => true,
+                'msg' => 'Puntaje asignado exitosamente !!',
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'msg' => 'Error al asignar el puntaje.' . $e,
             ]);
         }
     }
@@ -197,28 +297,17 @@ class TeacherController extends Controller
             return response()->json(['status' => false, 'msg' => 'El Profesor no existe']);
         }
 
-        if ($status == 0) {
-            // Si el status es 0, comprobar si el profesor tiene un curso asociado con alumnos
-            $course = $teacher->teachers->first()->course;
-            if ($course && $course->students()->whereHas('user', function ($query) {
-                $query->where('status', 1);
-            })->count() > 0) {
-                return response()->json(['status' => false, 'msg' => 'Este Profesor tiene un curso asociado con alumnos activos', 'data' => $teacher]);
-            } else {
-                $teacher->status = $status;
-                $teacher->save();
-                $message = 'Profesor Inhabilitado Exitosamente !!';
-            }
-        } else {
-            $teacher->status = $status;
-            $teacher->save();
+        if ($status == 1) {
             $message = 'Profesor Habilitado Exitosamente !!';
+        } else {
+            $message = 'Profesor Inhabilitado Exitosamente !!';
         }
 
         return response()->json(['status' => true, 'msg' => $message]);
     }
 
-    public function deleteTeacher($id){
+    public function deleteTeacher($id)
+    {
         $teacher = User::find($id);
 
         if (!$teacher) {
@@ -234,25 +323,59 @@ class TeacherController extends Controller
     {
         $college_id = Auth::user()->colleges->first()->college_id;
 
-        $students = User::whereHas('roles', function ($query) {
-            $query->where('role', env("ROLPROFE"));
-        })
-            ->whereHas('teachers.course', function ($query) use ($college_id) {
-                $query->where('college_id', $college_id);
-            })
-            ->with('teachers.course')
-            ->get();
+        $teachers = User::whereHas('roles', function ($query) {
+            $query->where('role', 'Profesor');
+        })->whereHas('teachers.courses', function ($query) use ($college_id) {
+            $query->where('college_id', $college_id);
+        })->with('teachers.courses')->get();
 
         $data = [];
-        foreach ($students as $key => $user) {
+        foreach ($teachers as $key => $user) {
             foreach ($user->teachers as $teacher) {
+                $courses = $teacher->courses->map(function ($course) {
+                    return '-' . '<strong>' . $course->name . '</strong>  ' . $course->section;
+                })->implode('<br>'); // Cambiar \n por <br> para salto de línea HTML
+
                 $data[] = [
                     'dni' => $user->dni,
                     'nombre' => $user->name,
                     'email' => $user->email,
                     'telefono' => $user->phone,
-                    'curso' => $teacher->course->name . ' ' . $teacher->course->section,
+                    'cursos' => $courses,
                     'direccion' => $teacher->address,
+                    'status' => $user->status,
+                ];
+            }
+        }
+        return response()->json([
+            'data' => $data,
+        ]);
+    }
+
+    public function getAllReport()
+    {
+        $teachers = User::with('teachers.courses.college', 'teachers')->whereHas('teachers')->get();
+
+        $data = [];
+        foreach ($teachers as $key => $user) {
+            $courses = [];
+            foreach ($user->teachers as $teacher) {
+                $profesor = [
+                    'Nombres' => $user->name,
+                    'Email' => $user->email,
+                    'Teléfono' => $user->phone,
+                ];
+                foreach ($teacher->courses as $course) {
+                    $collegeName = $course->college->name;
+                    $courseInfo =   $course->name . ' ' . $course->section;
+                    $courses[] = $courseInfo;
+                }
+                $data[] = [
+                    'dni' => $user->dni,
+                    'profesor' => $profesor,
+                    'colegio' => $collegeName,
+                    'cursos' => $courses,
+                    'direccion' => $user->address,
                     'status' => $user->status,
                 ];
             }

@@ -21,16 +21,9 @@
                             <input class="form-control" id="txtNombres" name="txtNombres" type="text" />
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label class="control-label">Correo</label>
-                            <input class="form-control" id="txtCorreoT" name="txtCorreoT" type="text" />
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label class="control-label">Puntaje Inicial</label>
-                            <input class="form-control" id="txtPuntajeInicial" name="txtPuntajeInicial"
-                                type="number" />
-                        </div>
+                    <div class="form-group ">
+                        <label class="control-label">Correo</label>
+                        <input class="form-control" id="txtCorreoT" name="txtCorreoT" type="text" />
                     </div>
                     <div class="form-group selectCursos">
                         <label class="control-label">Curso</label>
@@ -89,7 +82,7 @@
                             <td id="celCorreoT"></td>
                         </tr>
                         <tr>
-                            <td><strong>Curso Designado</strong></td>
+                            <td><strong>Curso(s) Designado</strong></td>
                             <td id="celCursoT"></td>
                         </tr>
                         <tr>

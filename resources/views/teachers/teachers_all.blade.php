@@ -1,6 +1,6 @@
 @extends('templates.base')
 @section('content')
-    @include('templates.modals.modalStudents-All')
+    @include('templates.modals.modalTeachers-All')
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <section class="content-header">
@@ -41,12 +41,12 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <table class="table table-striped table-responsive-lg" id="tableAlumnsAll"
+                                <table class="table table-striped table-responsive-lg" id="tableTeachersAll"
                                     style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>Rut</th>
-                                            <th>Alumno</th>
+                                            <th>Profesor</th>
                                             <th>Colegio</th>
                                             <th>Curso</th>
                                             <th>Status</th>

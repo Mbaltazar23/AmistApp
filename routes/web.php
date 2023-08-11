@@ -86,8 +86,19 @@ Route::middleware(['auth', 'checkrole:' . env("ROLADMIN"), 'clearcache'])->group
     Route::get("/students-all", [StudentController::class, 'getAllStudents']);
     Route::get("/students-all/select/{id}", [StudentController::class, 'getStudent']);
     Route::post("/students-all/setPassword", [StudentController::class, 'setPasswordStudent']);
+    Route::post("/students-all/setPoints", [StudentController::class, 'setPointsStudent']);
     Route::post("/students-all/status/{id}", [StudentController::class, 'setStatus']);
     Route::post("/students-all/report", [StudentController::class, 'getAllReport']);
+
+    /* Modulo Profesores */
+    Route::get('/profesores-all', [TeacherController::class, 'allTeachers']);
+    Route::get("/teachers-all", [TeacherController::class, 'getAllTeachers']);
+    Route::get("/teachers-all/select/{id}", [TeacherController::class, 'getTeacher']);
+    Route::post("/teachers-all/setPassword", [TeacherController::class, 'setPasswordTeacher']);
+    Route::post("/teachers-all/setPoints", [TeacherController::class, 'setPointsTeacher']);
+    Route::post("/teachers-all/status/{id}", [TeacherController::class, 'setStatus']);
+    Route::post("/teachers-all/report", [TeacherController::class, 'getAllReport']);
+
 
     /* Modulo Notificaciones */
     Route::get('/notificaciones', [NotificationController::class, 'index']);

@@ -31,10 +31,6 @@
                             <select class="form-control" id="listCurso" name="listCurso"></select>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="control-label">Puntaje Inicial</label>
-                        <input class="form-control" id="txtPuntajeInicial" name="txtPuntajeInicial" type="number" />
-                    </div>
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label class="control-label">Telefono</label>

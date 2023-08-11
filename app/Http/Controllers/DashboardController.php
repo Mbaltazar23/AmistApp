@@ -144,6 +144,7 @@ class DashboardController extends Controller
                             "Adminstrador(s) Colegio" => array("pagina" => "admin-colegio"),
                             "Colegios" => array("pagina" => "colegios"),
                             "Alumnos" => array("pagina" => "alumnos-all"),
+                            "Profesores" => array("pagina" => "profesores-all"),
                         ),
                     ),
                     "Catalogo" => array(

@@ -77,7 +77,7 @@ class StudentController extends Controller
                     $btnDelete = '<button class="btn btn-dark btn-sm" onClick="fntActivateInfo(' . $user->id . ')" title="Activar Alumno"><i class="fas fa-toggle-on"></i></button>';
                     $btnAllDelete = '<button class="btn btn-dark btn-sm" onClick="fntDelAll(' . $user->id . ')" title="Eliminar Alumno"><i class="far fa-trash-alt"></i></button>';
                 }
-                $row['options'] = '<div class="text-center">' . $btnView . ' ' . $btnEdit . ' ' . $btnDelete .' '.$btnAllDelete. '</div>';
+                $row['options'] = '<div class="text-center">' . $btnView . ' ' . $btnEdit . ' ' . $btnDelete . ' ' . $btnAllDelete . '</div>';
                 $data[] = $row;
             }
         }
@@ -95,6 +95,7 @@ class StudentController extends Controller
         $data = [];
         foreach ($students as $key => $user) {
             $btnChangePassword = '';
+            $btnSetPoints = "";
             $btnDisableAccount = '';
             foreach ($user->students as $student) {
                 $collegeName = $student->course->college->name;
@@ -106,14 +107,16 @@ class StudentController extends Controller
                 ];
                 if ($user->status == 1) {
                     $row['status'] = '<span class="badge badge-success">Activo</span>';
+                    $btnSetPoints = '<button class="btn btn-dark btn-sm" onClick="fntSetPoints(' . $user->id . ')" title="Asignar Puntaje"><i class="fas fa-star"></i></button>';
                     $btnChangePassword = '<button class="btn btn-primary btn-sm" onClick="fntChangePassword(' . $user->id . ')" title="Cambiar Contraseña"><i class="fas fa-key"></i></button>';
                     $btnDisableAccount = '<button class="btn btn-danger btn-sm" onClick="fntDisableAccount(' . $user->id . ')" title="Ocultar/Inhabilitar Cuenta"><i class="fas fa-user-times"></i></button>';
                 } else {
                     $row['status'] = '<span class="badge badge-danger">Inactivo</span>';
+                    $btnSetPoints = '<button class="btn btn-secondary btn-sm" onClick="fntSetPoints(' . $user->id . ')" title="Asignar Puntaje" disabled><i class="fas fa-star"></i></button>';
                     $btnChangePassword = '<button class="btn btn-secondary btn-sm" onClick="fntChangePassword(' . $user->id . ')" title="Cambiar Contraseña" disabled><i class="fas fa-key"></i></button>';
                     $btnDisableAccount = '<button class="btn btn-secondary btn-sm" onClick="fntEnableAccount(' . $user->id . ')" title="Mostrar/Habilitar Cuenta"><i class="fas fa-user-check"></i></button>';
                 }
-                $row['options'] = '<div class="text-center">' . $btnChangePassword . ' ' . $btnDisableAccount . '</div>';
+                $row['options'] = '<div class="text-center">' . $btnSetPoints . ' ' . $btnChangePassword . ' ' . $btnDisableAccount . '</div>';
                 $data[] = $row;
             }
         }
@@ -126,6 +129,18 @@ class StudentController extends Controller
 
     public function setStudent(Request $request)
     {
+        // Obtener el valor actual de stock_alumns del colegio
+        $college_id = Auth::user()->colleges->first()->college_id;
+        $college = College::find($college_id);
+        $currentStock = $college->stock_alumns;
+
+        // Verificar si agregar un nuevo estudiante supera el límite de stock_alumns
+        if ($currentStock <= 0) {
+            // Si el stock es igual o menor que cero, no se puede insertar más estudiantes.
+            // Aquí puedes lanzar una excepción, retornar un mensaje de error, o tomar cualquier otra acción según tus necesidades.
+            return response()->json(['status' => false, 'msg' => 'El stock de alumnos para este colegio ha sido superado', 'data' => null]);
+        }
+
         $id = $request->input('idAlumn');
         $dni = $request->input('txtRutAlu');
         $name = ucwords($request->input('txtNombres'));
@@ -133,10 +148,8 @@ class StudentController extends Controller
         $course = $request->input('listCurso');
         $phone = $request->input('txtTelefono');
         $address = $request->input('txtDireccion');
-        $points = $request->input("txtPuntajeInicial") ?? 100;
         $password = bcrypt("AmistApp.");
         $rol = env('ROLALU');
-        $college_id = Auth::user()->colleges->first()->college_id;
 
         if (empty($id)) {
             // Verificar si el usuario ya está registrado por su DNI
@@ -151,7 +164,6 @@ class StudentController extends Controller
             $user->name = $name;
             $user->email = $email;
             $user->phone = $phone;
-            $user->points = $points;
             if (!$address) {
                 $user->address = '';
             } else {
@@ -196,7 +208,6 @@ class StudentController extends Controller
             $user->name = $name;
             $user->email = $email;
             $user->phone = $phone;
-            $user->points = $points;
             if (!$address) {
                 $user->address = '';
             } else {
@@ -237,8 +248,6 @@ class StudentController extends Controller
         $listCursos = $request->input('listCursos');
         $users = $request->input('users');
 
-        // Validar y procesar los datos del arreglo de usuarios
-        $numUsers = 0; // Contador de usuarios nuevos
         foreach ($users as $user) {
             $dni = $user['dni'];
             $existingUser = User::where('dni', $dni)->first();
@@ -247,19 +256,29 @@ class StudentController extends Controller
                 continue; // Si el usuario ya existe, pasamos al siguiente
             }
 
+            // Obtener el valor actual de stock_alumns del colegio
+            $college = College::find($college_id);
+            $currentStock = $college->stock_alumns;
+
+            // Verificar si agregar un nuevo estudiante supera el límite de stock_alumns
+            if ($currentStock <= 0) {
+                // Si el stock es igual o menor que cero, no se puede insertar más estudiantes.
+                // Aquí puedes lanzar una excepción, retornar un mensaje de error, o tomar cualquier otra acción según tus necesidades.
+                return response()->json(['status' => false, 'msg' => 'El stock de alumnos para este colegio ha sido superado']);
+            }
+
             // Crear un nuevo usuario y asignar los datos
             $newUser = new User();
             $newUser->dni = $dni;
             $newUser->name = ucwords($user['nombre']);
             $newUser->email = ucfirst($user['email']);
-            $newUser->phone = "+56".$user['telefono'];
+            $newUser->phone = "+56" . $user['telefono'];
             $newUser->address = $user['direccion'] ?? '';
-            $newUser->password = bcrypt($user['password']) ??  bcrypt("AmistApp.");
-            $newUser->points = $user["puntos"] ?? 100;
+            $newUser->password = bcrypt($user['password']) ?? bcrypt("AmistApp.");
             $newUser->remember_token = Str::random(10);
             $newUser->save();
 
-            //Asignar Rol 
+            //Asignar Rol
             $userRole = new UserRoles();
             $userRole->role = $rol;
             $userRole->remember_token = Str::random(10);
@@ -278,14 +297,12 @@ class StudentController extends Controller
             $collegeUser->save();
             $newUser->colleges()->save($collegeUser);
 
-            $numUsers++; // Incrementar el contador de usuarios nuevos
+            // Reducir el stock_alumns actual
+            $college->stock_alumns = $currentStock - 1;
+            $college->save();
         }
 
-        // Restar el número de usuarios nuevos al campo stock_alumns del modelo College
-        $college = College::find($college_id);
-        $college->stock_alumns -= $numUsers;
-        $college->save();
-
+        // Devolver respuesta exitosa
         return response()->json(['status' => true, 'msg' => 'Datos guardados exitosamente']);
     }
 
@@ -308,6 +325,29 @@ class StudentController extends Controller
             return response()->json([
                 'status' => false,
                 'msg' => 'Error al actualizar la contraseña.' . $e,
+            ]);
+        }
+    }
+
+    public function setPointsStudent(Request $request)
+    {
+        $id = $request->input('idAlumnPoint');
+        $points = $request->input('txtPuntaje');
+
+        try {
+            $user = User::findOrFail($id);
+            $user->points = $points;
+            $user->save();
+
+            return response()->json([
+                'status' => true,
+                'msg' => 'Puntaje asignado exitosamente !!',
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'msg' => 'Error al asignar el puntaje.' . $e,
             ]);
         }
     }
@@ -405,6 +445,7 @@ class StudentController extends Controller
     public function deleteAlum($id)
     {
         $student = User::find($id);
+        $college_id = Auth::user()->colleges->first()->college_id;
 
         if (!$student) {
             return response()->json(['status' => false, 'msg' => 'El Alumno no existe']);
@@ -412,9 +453,13 @@ class StudentController extends Controller
 
         $student->delete();
 
+        // Incrementar el stock_alumns en 1 para el college correspondiente
+        $college = College::find($college_id);
+        $college->stock_alumns += 1;
+        $college->save();
+
         return response()->json(['status' => true, 'msg' => 'Alumno Eliminado Exitosamente !!']);
     }
-
 
     public function getAllReport()
     {
@@ -433,6 +478,7 @@ class StudentController extends Controller
                     'dni' => $user->dni,
                     'alumno' => $alumno,
                     'curso' => $student->course->name . ' ' . $student->course->section,
+                    'direccion' => $user->address,
                     "status" => $user->status,
                     'colegio' => $collegeName,
                 ];

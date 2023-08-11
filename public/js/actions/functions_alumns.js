@@ -212,6 +212,8 @@ function openModal() {
 function openModalRegisters() {
     document.querySelector("#listCursos").value = "0";
     document.querySelector("#fileInput").value = "";
+    document.querySelector("#fileInput").style.display = "none";
+    document.querySelector("#fileInputLabel").style.display = "none"
     $("#modalFormAlumnosIns").modal("show")
 }
 
@@ -249,7 +251,11 @@ document.querySelector("#btnActionIns").addEventListener("click", function () {
             for (var i = 1; i < jsonData.length; i++) {
                 var user = {};
                 for (var j = 0; j < headers.length; j++) {
-                    user[headers[j]] = jsonData[i][j];
+                    if (headers[j] === "password" && ! jsonData[i][j] || headers[j] === "direccion" && ! jsonData[i][j]) {
+                        user[headers[j]] = ""; // Establecer contraseña en blanco si no está presente
+                    } else {
+                        user[headers[j]] = jsonData[i][j];
+                    }
                 }
                 users.push(user);
             }
@@ -260,11 +266,11 @@ document.querySelector("#btnActionIns").addEventListener("click", function () {
                 listCursos: listCursos.value,
                 users: users
             }).then(function (response) {
+                tableAlumns.api().ajax.reload();
+                $("#modalFormAlumnosIns").modal("hide");
+                document.querySelector("#listCursos").value = "0";
+                document.querySelector("#fileInput").value = "";
                 if (response.data.status) {
-                    tableAlumns.api().ajax.reload();
-                    $("#modalFormAlumnosIns").modal("hide");
-                    document.querySelector("#listCursos").value = "0";
-                    document.querySelector("#fileInput").value = "";
                     swal("Exito !!", response.data.msg, "success");
                 } else {
                     swal("Error !!", response.data.msg, "error");
