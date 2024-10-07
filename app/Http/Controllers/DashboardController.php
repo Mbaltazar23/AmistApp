@@ -563,7 +563,7 @@ class DashboardController extends Controller
         return $productsBought;
     }
 
-    /*Cards Panel of Dashboard  : Profe */
+    /* Cards Panel of Dashboard  : Profe */
 
     public function countsAlumnsForTeacher($idTeacher)
     {

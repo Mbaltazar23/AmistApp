@@ -18,7 +18,7 @@ class StudentController extends Controller
     public function index()
     {
         $data = [
-            'page_tag' => env("NOMBRE_WEB") . " - Alumnos",
+            'page_tag' => env("NOMBRE_WEB") ." - Alumnos",
             'page_title' => 'Alumnos',
             'page_functions_js' => 'functions_alumns.js',
         ];

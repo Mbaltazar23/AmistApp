@@ -26,7 +26,6 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
  */
-Route::middleware('clearcache')->group(function () {
     Route::get('/', [AuthController::class, 'index'])->name('login');
     Route::get('/reset', [AuthController::class, 'resetPassword'])->name('resetPassword');
     Route::get('/change-password', [AuthController::class, 'changePassword'])->name('changePassword');
@@ -34,7 +33,7 @@ Route::middleware('clearcache')->group(function () {
     Route::post('/login/getEmail', [AuthController::class, 'getEmailUser']);
     Route::post('/login/setPassword', [AuthController::class, 'setPassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
-});
+
 
 Route::middleware('auth', 'clearcache')->group(function () {
     /* Modulo Dashboard */
